@@ -1,0 +1,6 @@
+{
+  "name": "Generative Wiki",
+  "description": "Explore a generative wiki where every word is a hyperlink to descriptions generated in real-time.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
