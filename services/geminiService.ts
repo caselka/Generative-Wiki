@@ -11,7 +11,7 @@ if (!process.env.API_KEY) {
 }
 
 const ai = new GoogleGenAI({apiKey: process.env.API_KEY!});
-const textModelName = 'gemini-2.5-flash-lite';
+const textModelName = 'gemini-flash-lite-latest';
 
 const languageMap: Record<LanguageCode, string> = {
   en: 'English',
@@ -55,9 +55,35 @@ export async function* streamDefinition(
     }
   } catch (error) {
     console.error('Error streaming from Gemini:', error);
-    const errorMessage =
-      error instanceof Error ? error.message : 'An unknown error occurred.';
-    yield `Error: Could not generate content for "${topic}". ${errorMessage}`;
+    
+    let detailedMessage = 'An unknown error occurred.';
+    
+    if (error instanceof Error && error.message) {
+      let messageToParse = error.message;
+      
+      const jsonStartIndex = messageToParse.indexOf('{');
+      if (jsonStartIndex > -1) {
+        messageToParse = messageToParse.substring(jsonStartIndex);
+      }
+
+      try {
+        const apiError = JSON.parse(messageToParse);
+        if (apiError.error?.status === 'RESOURCE_EXHAUSTED') {
+          detailedMessage = "Whoa there, tiger... this is a free service, too many tokens being burned! Come back later. Consider donating to keep Generative Wiki online for longer!";
+        } else if (apiError.error?.message) {
+          detailedMessage = apiError.error.message;
+        } else {
+          detailedMessage = error.message;
+        }
+      } catch (e) {
+        detailedMessage = error.message;
+      }
+    } else if (typeof error === 'string') {
+        detailedMessage = error;
+    }
+    
+    const errorMessage = `Could not generate content for "${topic}". ${detailedMessage}`;
+    yield `Error: ${errorMessage}`;
     throw new Error(errorMessage);
   }
 }

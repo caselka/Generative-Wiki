@@ -57,7 +57,13 @@ function doPost(e) {
 // 8. Click Deploy. Authorize the script when prompted.
 // 9. Copy the Web app URL and paste it into the SCRIPT_URL variable below.
 
-const SCRIPT_URL = ''; // PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwLDzlDy_uKUnvOGIXKCsV3KYKnq3tSPfuKPJbUQV_8oCX7cPMwG4bcftCX7X6txMQ/exec';
+
+// Client-side rate limiting to prevent abuse.
+// This is not foolproof but helps prevent accidental spamming.
+const MAX_SUBMISSIONS_PER_HOUR = 5;
+const ONE_HOUR_IN_MS = 60 * 60 * 1000;
+const FEEDBACK_STORAGE_KEY = 'feedbackSubmissions';
 
 interface FeedbackData {
     topic: string;
@@ -66,10 +72,40 @@ interface FeedbackData {
 }
 
 /**
+ * Checks if the user has submitted feedback too frequently and records the new submission.
+ * Throws an error if the rate limit is exceeded.
+ */
+function checkAndRecordSubmission() {
+    try {
+        const now = Date.now();
+        const stored = localStorage.getItem(FEEDBACK_STORAGE_KEY);
+        let timestamps: number[] = stored ? JSON.parse(stored) : [];
+
+        // Keep only timestamps from the last hour
+        timestamps = timestamps.filter(ts => (now - ts) < ONE_HOUR_IN_MS);
+
+        if (timestamps.length >= MAX_SUBMISSIONS_PER_HOUR) {
+            throw new Error(`Rate limit exceeded. Please try again later. You can submit feedback ${MAX_SUBMISSIONS_PER_HOUR} times per hour.`);
+        }
+
+        // Record new submission
+        timestamps.push(now);
+        localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(timestamps));
+    } catch (error) {
+        // This can happen if localStorage is disabled, full, or if the stored data is corrupt.
+        // This is a "best-effort" client-side limit, so we will log the error and allow the submission to proceed.
+        console.warn('Could not enforce feedback rate limit:', error);
+    }
+}
+
+
+/**
  * Submits feedback data to a configured Google Apps Script endpoint.
  * @param data The feedback data to submit.
  */
 export async function submitFeedback(data: FeedbackData): Promise<void> {
+    checkAndRecordSubmission(); // Throws an error if rate limit is hit, which is caught by the component.
+
     if (!SCRIPT_URL) {
         console.log('Feedback submission skipped: SCRIPT_URL is not configured.');
         console.log('Simulated feedback data:', data);

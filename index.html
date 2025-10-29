@@ -138,20 +138,6 @@
         opacity: 1;
       }
       
-      .nav-button {
-        padding: 0.5rem 0.5rem;
-        font-size: 1.5em;
-        line-height: 1;
-        color: var(--text-color);
-        user-select: none;
-        transition: color 0.2s ease-in-out;
-      }
-      .nav-button:hover:not(:disabled) { color: var(--link-hover-color); }
-      .nav-button:disabled {
-        color: var(--button-disabled-color);
-        cursor: default;
-      }
-      
       .random-button {
         padding: 0.5rem 0;
         font: inherit;
@@ -296,6 +282,52 @@
         margin-top: 1.5rem;
         color: var(--text-color-secondary);
       }
+
+      /* History List */
+      .history-container {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+      }
+      .history-title {
+        color: var(--text-color-secondary);
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+        font-weight: bold;
+      }
+      .history-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+      }
+      .history-list > li {
+        min-width: 0; /* Prevents grid item from overflowing its cell */
+      }
+      .history-item {
+        color: var(--text-color-secondary);
+        transition: color 0.2s ease-in-out;
+        padding: 0.25rem 0.5rem;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .history-item:hover:not(:disabled) {
+        color: var(--link-hover-color);
+        text-decoration: underline;
+      }
+      .history-item.active {
+        color: var(--text-color);
+        font-weight: 600;
+        cursor: default;
+      }
       
       /* Settings Controls */
       .settings-container {
@@ -336,6 +368,9 @@
           font-size: 1rem;
         }
         .search-container { margin-bottom: 2rem; }
+        .history-list {
+          grid-template-columns: repeat(3, 1fr);
+        }
       }
     </style>
   <script type="importmap">

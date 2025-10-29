@@ -14,6 +14,7 @@ import DonatePage from './components/DonatePage';
 import WelcomeScreen from './components/WelcomeScreen';
 import CurationControls from './components/CurationControls';
 import Settings from './components/Settings';
+import HistoryList from './components/HistoryList';
 import { useTranslations, LanguageCode } from './i18n';
 
 // A curated list of "banger" words and phrases for the random button.
@@ -23,9 +24,46 @@ const PREDEFINED_WORDS = [
   'Zigzag', 'Waves', 'Spiral', 'Bounce', 'Slant', 'Drip', 'Stretch', 'Squeeze', 'Float', 'Fall', 'Spin', 'Melt', 'Rise', 'Twist', 'Explode', 'Stack', 'Mirror', 'Echo', 'Vibrate',
   'Gravity', 'Friction', 'Momentum', 'Inertia', 'Turbulence', 'Pressure', 'Tension', 'Oscillate', 'Fractal', 'Quantum', 'Entropy', 'Vortex', 'Resonance', 'Equilibrium', 'Centrifuge', 'Elastic', 'Viscous', 'Refract', 'Diffuse', 'Cascade', 'Levitate', 'Magnetize', 'Polarize', 'Accelerate', 'Compress', 'Undulate',
   'Liminal', 'Ephemeral', 'Paradox', 'Zeitgeist', 'Metamorphosis', 'Synesthesia', 'Recursion', 'Emergence', 'Dialectic', 'Apophenia', 'Limbo', 'Flux', 'Sublime', 'Uncanny', 'Palimpsest', 'Chimera', 'Void', 'Transcend', 'Ineffable', 'Qualia', 'Gestalt', 'Simulacra', 'Abyssal',
-  'Existential', 'Nihilism', 'Solipsism', 'Phenomenology', 'Hermeneutics', 'Deconstruction', 'Postmodern', 'Absurdism', 'Catharsis', 'Epiphany', 'Melancholy', 'Nostalgia', 'Longing', 'Reverie', 'Pathos', 'Ethos', 'Logos', 'Mythos', 'Anamnesis', 'Intertextuality', 'Metafiction', 'Stream', 'Lacuna', 'Caesura', 'Enjambment'
+  'Existential', 'Nihilism', 'Solipsism', 'Phenomenology', 'Hermeneutics', 'Deconstruction', 'Postmodern', 'Absurdism', 'Catharsis', 'Epiphany', 'Melancholy', 'Nostalgia', 'Longing', 'Reverie', 'Pathos', 'Ethos', 'Logos', 'Mythos', 'Anamnesis', 'Intertextuality', 'Metafiction', 'Stream', 'Lacuna', 'Caesura', 'Enjambment',
+  
+  // Rick and Morty Quotes
+  'Wubba lubba dub dub!',
+  'Get schwifty',
+  'Nobody exists on purpose. Nobody belongs anywhere. We are all going to die. Come watch TV.',
+  'To live is to risk it all.',
+  'Sometimes science is more art than science.',
+  'The universe is a cruel, uncaring void.',
+  'Plumbus',
+
+  // Historical & Philosophical Quotes
+  'Veni, vidi, vici.',
+  'The only thing we have to fear is fear itself.',
+  'That is one small step for a man, one giant leap for mankind.',
+  'The unexamined life is not worth living.',
+  'I think, therefore I am.',
+  'What is the sound of one hand clapping?',
+  'To be or not to be, that is the question.',
+
+  // Random long sentences & prompts
+  'An exploration of the butterfly effect in daily life.',
+  'The inherent paradox of a self-aware machine.',
+  'A conversation between a star and a black hole.',
+  'The last thought of a dying universe.',
+  'What happens when an unstoppable force meets an immovable object?',
+
+  // Made up words
+  'Glimmerfang',
+  'Chrono-scrambler',
+  'Quibblesnatch',
+  'Flibbertigibbet',
+  'Vapor-lock dream',
+  'Zorp',
+  'Gloob',
+  'Synthezoid',
+  'Aether-drip',
 ];
 const UNIQUE_WORDS = [...new Set(PREDEFINED_WORDS)];
+const HISTORY_CAP = 16;
 
 const App: React.FC = () => {
   const [history, setHistory] = useState<string[]>([]);
@@ -53,8 +91,6 @@ const App: React.FC = () => {
   const t = useTranslations(language);
 
   const currentTopic = history[historyIndex] ?? '';
-  const canGoBack = historyIndex > 0;
-  const canGoForward = historyIndex < history.length - 1;
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -107,8 +143,14 @@ const App: React.FC = () => {
   const navigateToTopic = useCallback((newTopic: string) => {
     const trimmedTopic = newTopic.trim();
     if (!trimmedTopic || trimmedTopic.toLowerCase() === currentTopic.toLowerCase()) return;
-    const newHistory = history.slice(0, historyIndex + 1);
+    
+    let newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(trimmedTopic);
+
+    if (newHistory.length > HISTORY_CAP) {
+      newHistory = newHistory.slice(1);
+    }
+    
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   }, [history, historyIndex, currentTopic]);
@@ -126,8 +168,12 @@ const App: React.FC = () => {
     navigateToTopic(randomWord);
   }, [currentTopic, navigateToTopic]);
 
-  const handleBack = () => { if (canGoBack) setHistoryIndex(historyIndex - 1); };
-  const handleForward = () => { if (canGoForward) setHistoryIndex(historyIndex + 1); };
+  const handleHistoryClick = (index: number) => {
+    if (index !== historyIndex) {
+      setHistoryIndex(index);
+    }
+  };
+
   const handleNavClick = (newPage: string) => { window.scrollTo(0, 0); setPage(newPage); };
   const handleRating = (newRating: 'up' | 'down') => { setCurrentRating(newRating); };
   
@@ -163,6 +209,16 @@ const App: React.FC = () => {
             {content.length > 0 && !error && (
                <ContentDisplay content={content} isLoading={isLoading} onWordClick={handleWordClick} />
             )}
+            
+            {!isLoading && !error && history.length > 1 && (
+              <HistoryList
+                history={history}
+                currentIndex={historyIndex}
+                onHistoryClick={handleHistoryClick}
+                t={t}
+              />
+            )}
+
             {!isLoading && !error && content.length > 0 && (
               <CurationControls 
                 rating={currentRating} 
@@ -197,10 +253,6 @@ const App: React.FC = () => {
           onSearch={handleSearch} 
           onRandom={handleRandom} 
           isLoading={isLoading}
-          onBack={handleBack}
-          onForward={handleForward}
-          canGoBack={canGoBack}
-          canGoForward={canGoForward}
           t={t}
         />
       )}

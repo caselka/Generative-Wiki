@@ -18,8 +18,6 @@ const translations = {
     en: {
         searchPlaceholder: 'Search',
         randomButton: 'Random',
-        goBack: 'Go back',
-        goForward: 'Go forward',
         searchAriaLabel: 'Search for a topic',
         rateThisGeneration: 'Rate this generation',
         goodGeneration: 'Good generation',
@@ -39,12 +37,11 @@ const translations = {
         errorOccurred: 'An Error Occurred',
         unknownError: 'An unknown error occurred',
         contentCouldNotBeGenerated: 'Content could not be generated.',
+        historyTitle: 'History',
     },
     es: {
         searchPlaceholder: 'Buscar',
         randomButton: 'Aleatorio',
-        goBack: 'Atrás',
-        goForward: 'Adelante',
         searchAriaLabel: 'Buscar un tema',
         rateThisGeneration: 'Califica esta generación',
         goodGeneration: 'Buena generación',
@@ -64,12 +61,11 @@ const translations = {
         errorOccurred: 'Ocurrió un Error',
         unknownError: 'Ocurrió un error desconocido',
         contentCouldNotBeGenerated: 'No se pudo generar el contenido.',
+        historyTitle: 'Historial',
     },
     fr: {
         searchPlaceholder: 'Rechercher',
         randomButton: 'Aléatoire',
-        goBack: 'Retour',
-        goForward: 'Avant',
         searchAriaLabel: 'Rechercher un sujet',
         rateThisGeneration: 'Évaluez cette génération',
         goodGeneration: 'Bonne génération',
@@ -89,12 +85,11 @@ const translations = {
         errorOccurred: 'Une Erreur est Survenue',
         unknownError: 'Une erreur inconnue est survenue',
         contentCouldNotBeGenerated: 'Le contenu n\'a pas pu être généré.',
+        historyTitle: 'Historique',
     },
     de: {
         searchPlaceholder: 'Suchen',
         randomButton: 'Zufällig',
-        goBack: 'Zurück',
-        goForward: 'Vorwärts',
         searchAriaLabel: 'Nach einem Thema suchen',
         rateThisGeneration: 'Bewerte diese Generierung',
         goodGeneration: 'Gute Generierung',
@@ -114,12 +109,11 @@ const translations = {
         errorOccurred: 'Ein Fehler ist Aufgetreten',
         unknownError: 'Ein unbekannter Fehler ist aufgetreten',
         contentCouldNotBeGenerated: 'Inhalt konnte nicht generiert werden.',
+        historyTitle: 'Verlauf',
     },
     ja: {
         searchPlaceholder: '検索',
         randomButton: 'ランダム',
-        goBack: '戻る',
-        goForward: '進む',
         searchAriaLabel: 'トピックを検索',
         rateThisGeneration: 'この生成を評価',
         goodGeneration: '良い生成',
@@ -139,11 +133,16 @@ const translations = {
         errorOccurred: 'エラーが発生しました',
         unknownError: '不明なエラーが発生しました',
         contentCouldNotBeGenerated: 'コンテンツを生成できませんでした。',
+        historyTitle: '履歴',
     },
 };
 
 export type Translation = typeof translations['en'];
 
 export function useTranslations(lang: LanguageCode): Translation {
-  return useMemo(() => translations[lang] || translations.en, [lang]);
+  return useMemo(() => {
+    const base = translations[lang] || translations.en;
+    // Fallback for missing keys in a specific language
+    return { ...translations.en, ...base };
+  }, [lang]);
 }
