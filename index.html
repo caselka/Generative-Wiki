@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -9,38 +9,77 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kosugi&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --bg-color: #ffffff;
+        --text-color: #000000;
+        --text-color-secondary: #555;
+        --text-color-tertiary: #888;
+        --link-color: #0000ff;
+        --link-hover-color: #0000ff;
+        --border-color: #e0e0e0;
+        --border-color-interactive: #ccc;
+        --border-color-interactive-hover: #000;
+        --button-disabled-color: #ccc;
+        --skeleton-bg-color: #e0e0e0;
+        --button-primary-bg: #000;
+        --button-primary-text: #fff;
+        --button-primary-hover-bg: #333;
+        --icon-stroke-color: #000;
+        --selected-bg-color: #f0f0f0;
+        --selected-icon-stroke-color: #fff;
+      }
+      
+      [data-theme="dark"] {
+        --bg-color: #121212;
+        --text-color: #e0e0e0;
+        --text-color-secondary: #aaa;
+        --text-color-tertiary: #777;
+        --link-color: #bb86fc;
+        --link-hover-color: #bb86fc;
+        --border-color: #333;
+        --border-color-interactive: #555;
+        --border-color-interactive-hover: #e0e0e0;
+        --button-disabled-color: #555;
+        --skeleton-bg-color: #333;
+        --button-primary-bg: #e0e0e0;
+        --button-primary-text: #121212;
+        --button-primary-hover-bg: #bbb;
+        --icon-stroke-color: #e0e0e0;
+        --selected-bg-color: #333;
+        --selected-icon-stroke-color: #e0e0e0;
+      }
+
       @keyframes blink {
         from, to { opacity: 1 }
         50% { opacity: 0; }
       }
 
       body {
-        background-color: #ffffff;
-        color: #000000;
+        background-color: var(--bg-color);
+        color: var(--text-color);
         font-family: 'Kosugi', sans-serif;
-        font-size: 1.1rem; /* Set base font size for the entire app */
-        line-height: 1.6; /* Set base line height for readability */
+        font-size: 1.1rem;
+        line-height: 1.6;
         margin: 0;
-        padding: 2rem 2rem 8rem 2rem; /* Increased bottom padding for sticky footer */
+        padding: 2rem 2rem 10rem 2rem; /* More bottom padding for taller footer */
+        transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
       }
       #root {
-        max-width: 65ch; /* Optimal line length for readability */
+        max-width: 65ch;
         margin: auto;
       }
-      /* Reset headers to have the same font size as the body */
       h1, h2, h3, h4, h5, h6 {
-        font-size: 1em; /* 1em equals the parent font-size, which is 1.1rem from body */
+        font-size: 1em;
         margin: 0;
-        font-weight: normal; /* Ensure no bolding by default */
+        font-weight: normal;
       }
       a {
-        color: #0000ff;
+        color: var(--link-color);
         text-decoration: none;
       }
       a:hover {
         text-decoration: underline;
       }
-      /* Reset button for link-like behavior */
       button {
         background: none;
         border: none;
@@ -50,17 +89,17 @@
         cursor: pointer;
       }
       .interactive-word {
-        color: #000000;
+        color: var(--text-color);
         text-decoration: none;
         transition: color 0.2s ease-in-out;
       }
       .interactive-word:hover {
-        color: #0000ff;
+        color: var(--link-hover-color);
         text-decoration: underline;
       }
       .footer-text {
         font-size: 0.9em;
-        color: #888;
+        color: var(--text-color-tertiary);
       }
       .footer-text a {
         color: inherit;
@@ -68,111 +107,61 @@
         transition: color 0.2s ease-in-out;
       }
       .footer-text a:hover {
-        color: #0000ff;
+        color: var(--link-hover-color);
         text-decoration: underline;
-      }
-      .ascii-art {
-        font-family: 'Courier New', Courier, monospace;
-        text-align: left;
-        white-space: pre;
-        color: #888;
-        margin: 2rem 0;
-        line-height: 1.0;
-        font-size: 0.8em;
-        overflow-x: auto;
-        letter-spacing: normal; /* Prevent character spacing issues */
-        font-variant-ligatures: none; /* Prevent character combining */
-        /* Custom scrollbar for Firefox */
-        scrollbar-width: thin;
-        scrollbar-color: #ccc transparent;
-      }
-      /* Custom scrollbar for Webkit browsers (Chrome, Safari) */
-      .ascii-art::-webkit-scrollbar {
-        height: 4px;
-        width: 4px;
-      }
-      .ascii-art::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .ascii-art::-webkit-scrollbar-thumb {
-        background-color: #ccc;
-        border-radius: 4px;
       }
       .blinking-cursor {
         animation: blink 1s step-end infinite;
       }
       
-      /* Search Bar Styles */
       .search-container {
         display: flex;
-        align-items: baseline; /* Align to baseline */
+        align-items: baseline;
         gap: 0.75rem;
         margin-bottom: 3rem;
       }
-
-      .search-form {
-        flex-grow: 1; /* Make form take available space */
-      }
-
+      .search-form { flex-grow: 1; }
       .search-input {
         width: 100%;
         padding: 0.5rem 0.2rem;
-        font: inherit; /* Inherit font from body */
-        color: inherit; /* Inherit text color */
+        font: inherit;
+        color: inherit;
         border: none;
-        border-bottom: 1px solid transparent; /* No visible line by default */
+        border-bottom: 1px solid transparent;
         background-color: transparent;
-        box-sizing: border-box; /* Include padding in width */
-        outline: none; /* Remove default focus outline */
+        box-sizing: border-box;
+        outline: none;
       }
-      
-      .search-input:disabled {
-        color: #ccc;
-      }
-
+      .search-input:disabled { color: var(--button-disabled-color); }
       .search-input::placeholder {
-        color: #000000;
-        opacity: 1; /* Override browser default lighter color */
+        color: var(--text-color);
+        opacity: 1;
       }
       
       .nav-button {
-        background: none;
-        border: none;
-        padding: 0.5rem 0.5rem; /* Symmetric padding */
-        font-size: 1.5em; /* Make arrows larger */
-        line-height: 1; /* Prevent extra height from font-size */
-        color: #000000;
-        cursor: pointer;
-        user-select: none; /* Prevent text selection */
+        padding: 0.5rem 0.5rem;
+        font-size: 1.5em;
+        line-height: 1;
+        color: var(--text-color);
+        user-select: none;
         transition: color 0.2s ease-in-out;
       }
-      
-      .nav-button:hover:not(:disabled) {
-        color: #0000ff;
-      }
-
+      .nav-button:hover:not(:disabled) { color: var(--link-hover-color); }
       .nav-button:disabled {
-        color: #ccc;
+        color: var(--button-disabled-color);
         cursor: default;
       }
       
       .random-button {
-        background: none;
-        border: none;
-        padding: 0.5rem 0; /* Align vertically with input */
+        padding: 0.5rem 0;
         font: inherit;
-        color: #000000;
-        cursor: pointer;
-        white-space: nowrap; /* Prevent "Random" from wrapping */
+        color: var(--text-color);
+        white-space: nowrap;
         transition: color 0.2s ease-in-out;
       }
-      
-      .random-button:hover:not(:disabled) {
-        color: #0000ff;
-      }
-
+      .random-button:hover:not(:disabled) { color: var(--link-hover-color); }
       .random-button:disabled {
-        color: #ccc;
+        color: var(--button-disabled-color);
         cursor: default;
       }
 
@@ -184,9 +173,10 @@
         width: 100%;
         text-align: center;
         padding: 1.5rem 0;
-        background-color: #ffffff;
+        background-color: var(--bg-color);
+        border-top: 1px solid var(--border-color);
+        transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
       }
-
       .footer-nav {
         display: flex;
         justify-content: center;
@@ -195,46 +185,158 @@
         font-size: 0.9em;
       }
       .footer-nav a {
-        color: #888;
-        text-decoration: none;
+        color: var(--text-color-tertiary);
         transition: color 0.2s ease-in-out;
       }
       .footer-nav a:hover {
-        color: #0000ff;
+        color: var(--link-hover-color);
         text-decoration: underline;
       }
       
       .donate-button {
         display: inline-block;
         padding: 0.75rem 1.5rem;
-        background-color: #0000ff;
-        color: #ffffff !important; /* Override default link color */
+        background-color: var(--link-color);
+        color: var(--bg-color) !important;
         text-decoration: none;
         border-radius: 4px;
         font-weight: bold;
         transition: background-color 0.2s;
       }
       .donate-button:hover {
-        background-color: #0000cc;
+        background-color: var(--link-hover-color);
         text-decoration: none;
       }
-      
-      /* Mobile Responsive Styles */
-      @media (max-width: 600px) {
-        body {
-          padding: 1.5rem 1.5rem 8rem 1.5rem;
-          font-size: 1rem; /* Slightly reduce base font size on small screens */
-        }
 
-        .search-container {
-          margin-bottom: 2rem;
-        }
-        
-        .ascii-art {
-          margin: 1.5rem 0;
-        }
+      .curation-container {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        text-align: center;
+      }
+      .curation-prompt {
+        margin: 0 0 1rem 0;
+        color: var(--text-color-secondary);
+        font-size: 0.9em;
+      }
+      .curation-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+      }
+      .curation-buttons button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem;
+        border-radius: 50%;
+        width: 3rem;
+        height: 3rem;
+        border: 1px solid var(--border-color-interactive);
+        transition: all 0.2s ease-in-out;
+      }
+      .curation-buttons button svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        stroke: var(--icon-stroke-color);
+        fill: none;
+        transition: all 0.2s ease-in-out;
+      }
+      .curation-buttons button:hover:not(:disabled) {
+        border-color: var(--border-color-interactive-hover);
+        background-color: var(--selected-bg-color);
+      }
+      .curation-buttons button:disabled:not(.selected) { opacity: 0.5; cursor: default; }
+      .curation-buttons button.selected { cursor: default; }
+      .curation-buttons button.selected {
+        border-color: var(--border-color-interactive-hover);
+        background-color: var(--button-primary-bg);
+      }
+      .curation-buttons button.selected svg {
+        stroke: var(--button-primary-text);
+      }
+      
+      .feedback-form {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+      }
+      .feedback-textarea {
+        width: 100%;
+        max-width: 450px;
+        padding: 0.75rem;
+        font: inherit;
+        border: 1px solid var(--border-color-interactive);
+        border-radius: 4px;
+        resize: vertical;
+        min-height: 80px;
+        box-sizing: border-box;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+      }
+      .feedback-submit-button {
+        padding: 0.5rem 1.5rem;
+        font: inherit;
+        background-color: var(--button-primary-bg);
+        color: var(--button-primary-text);
+        border: 1px solid var(--button-primary-bg);
+        border-radius: 4px;
+        transition: all 0.2s ease-in-out;
+      }
+      .feedback-submit-button:hover:not(:disabled) { background-color: var(--button-primary-hover-bg); }
+      .feedback-submit-button:disabled {
+        background-color: var(--button-disabled-color);
+        border-color: var(--button-disabled-color);
+        cursor: default;
+      }
+      .feedback-submitted-message {
+        margin-top: 1.5rem;
+        color: var(--text-color-secondary);
+      }
+      
+      /* Settings Controls */
+      .settings-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 0.75rem;
+      }
+      .theme-toggle, .language-select {
+        color: var(--text-color-tertiary);
+        transition: color 0.2s ease-in-out;
+      }
+      .theme-toggle:hover, .language-select:hover {
+        color: var(--link-hover-color);
+      }
+      .theme-toggle svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        vertical-align: middle;
+      }
+      .language-select {
+        background: transparent;
+        border: none;
+        font: inherit;
+        font-size: 0.9em;
+        cursor: pointer;
+        padding: 0.25rem;
+      }
+      .language-select option {
+        background: var(--bg-color);
+        color: var(--text-color);
       }
 
+      @media (max-width: 600px) {
+        body {
+          padding: 1.5rem 1.5rem 10rem 1.5rem;
+          font-size: 1rem;
+        }
+        .search-container { margin-bottom: 2rem; }
+      }
     </style>
   <script type="importmap">
 {
