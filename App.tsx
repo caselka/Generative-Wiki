@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { streamDefinition } from './services/geminiService';
-import { submitFeedback } from './services/feedbackService';
+import { submitFeedback, logSearch } from './services/feedbackService';
 import ContentDisplay from './components/ContentDisplay';
 import SearchBar from './components/SearchBar';
 import LoadingSkeleton from './components/LoadingSkeleton';
@@ -144,6 +144,9 @@ const App: React.FC = () => {
     const trimmedTopic = newTopic.trim();
     if (!trimmedTopic || trimmedTopic.toLowerCase() === currentTopic.toLowerCase()) return;
     
+    // Fire-and-forget logging call
+    logSearch(trimmedTopic);
+
     let newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(trimmedTopic);
 

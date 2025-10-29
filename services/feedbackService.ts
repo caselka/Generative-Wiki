@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-// README: How to set up your feedback database with Google Sheets.
+// README: How to set up your feedback and logging database with Google Sheets.
 // 1. Create a new Google Sheet.
 // 2. Go to Extensions > Apps Script.
-// 3. Paste the following code into the script editor and save it:
+// 3. Paste the following code into the script editor and save it. This script
+//    will automatically create and manage two sheets: 'Feedback' and 'Search Logs'.
 /*
 function doPost(e) {
   try {
@@ -14,34 +15,56 @@ function doPost(e) {
     var lock = LockService.getScriptLock();
     lock.waitLock(30000); // Wait up to 30 seconds
 
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    
-    // Add headers if the sheet is empty
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["Timestamp", "Topic", "Rating", "Reason", "Output"]);
-    }
-    
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
     var data = JSON.parse(e.postData.contents);
-    
-    // Basic validation
-    if (!data.topic || !data.rating) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ "status": "error", "message": "Missing required fields." }))
-        .setMimeType(ContentService.MimeType.JSON);
+    var timestamp = new Date();
+
+    if (data.type === 'search') {
+      var searchSheetName = 'Search Logs';
+      var sheet = ss.getSheetByName(searchSheetName);
+      if (!sheet) {
+        sheet = ss.insertSheet(searchSheetName);
+        sheet.appendRow(["Timestamp", "Topic", "IP Address", "Country", "Region", "City", "Latitude", "Longitude", "ISP", "Organization"]);
+      }
+      var loc = data.location || {};
+      sheet.appendRow([
+        timestamp,
+        data.topic,
+        loc.query || 'N/A',
+        loc.country || 'N/A',
+        loc.regionName || 'N/A',
+        loc.city || 'N/A',
+        loc.lat || 'N/A',
+        loc.lon || 'N/A',
+        loc.isp || 'N/A',
+        loc.org || 'N/A'
+      ]);
+
+    } else { // Handle feedback (default)
+      var feedbackSheetName = 'Feedback';
+      var sheet = ss.getSheetByName(feedbackSheetName);
+      if (!sheet) {
+        sheet = ss.insertSheet(feedbackSheetName, 0); // Insert at the first position
+        sheet.appendRow(["Timestamp", "Topic", "Rating", "Reason", "Output"]);
+      } else if (sheet.getLastRow() === 0) {
+         // Add headers if sheet exists but is empty
+        sheet.appendRow(["Timestamp", "Topic", "Rating", "Reason", "Output"]);
+      }
+      
+      if (!data.topic || !data.rating) {
+        throw new Error("Missing required feedback fields: topic and rating.");
+      }
+      sheet.appendRow([timestamp, data.topic, data.rating, data.reason || '', data.output || '']);
     }
     
-    var timestamp = new Date();
-    sheet.appendRow([timestamp, data.topic, data.rating, data.reason || '', data.output || '']);
-    
-    lock.releaseLock(); // Release the lock
+    lock.releaseLock();
     
     return ContentService
       .createTextOutput(JSON.stringify({ "status": "success" }))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
-    // Make sure to release the lock in case of an error
-    if (lock) {
+    if (lock && lock.hasLock()) {
       lock.releaseLock();
     }
     return ContentService
@@ -53,17 +76,20 @@ function doPost(e) {
 // 4. Click Deploy > New deployment.
 // 5. Select "Web app" for the configuration type.
 // 6. For "Execute as," select "Me".
-// 7. For "Who has access," select "Anyone". This is required for anonymous feedback.
+// 7. For "Who has access," select "Anyone". This is required for anonymous submissions.
 // 8. Click Deploy. Authorize the script when prompted.
 // 9. Copy the Web app URL and paste it into the SCRIPT_URL variable below.
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwLDzlDy_uKUnvOGIXKCsV3KYKnq3tSPfuKPJbUQV_8oCX7cPMwG4bcftCX7X6txMQ/exec';
 
-// Client-side rate limiting to prevent abuse.
-// This is not foolproof but helps prevent accidental spamming.
-const MAX_SUBMISSIONS_PER_HOUR = 5;
+// --- Client-side rate limiting to prevent abuse ---
 const ONE_HOUR_IN_MS = 60 * 60 * 1000;
+
+const MAX_FEEDBACK_SUBMISSIONS_PER_HOUR = 5;
 const FEEDBACK_STORAGE_KEY = 'feedbackSubmissions';
+
+const MAX_SEARCH_LOGS_PER_HOUR = 100;
+const SEARCH_LOG_STORAGE_KEY = 'searchLogSubmissions';
 
 interface FeedbackData {
     topic: string;
@@ -73,29 +99,32 @@ interface FeedbackData {
 }
 
 /**
- * Checks if the user has submitted feedback too frequently and records the new submission.
- * Throws an error if the rate limit is exceeded.
+ * A generic rate-limiting utility function.
+ * Throws an error if the rate limit is exceeded for the given key.
  */
-function checkAndRecordSubmission() {
+function checkAndRecord(storageKey: string, maxPerHour: number, limitName: string) {
     try {
         const now = Date.now();
-        const stored = localStorage.getItem(FEEDBACK_STORAGE_KEY);
+        const stored = localStorage.getItem(storageKey);
         let timestamps: number[] = stored ? JSON.parse(stored) : [];
 
         // Keep only timestamps from the last hour
         timestamps = timestamps.filter(ts => (now - ts) < ONE_HOUR_IN_MS);
 
-        if (timestamps.length >= MAX_SUBMISSIONS_PER_HOUR) {
-            throw new Error(`Rate limit exceeded. Please try again later. You can submit feedback ${MAX_SUBMISSIONS_PER_HOUR} times per hour.`);
+        if (timestamps.length >= maxPerHour) {
+            throw new Error(`Rate limit for ${limitName} exceeded. Please try again later. You can submit ${maxPerHour} times per hour.`);
         }
 
         // Record new submission
         timestamps.push(now);
-        localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(timestamps));
+        localStorage.setItem(storageKey, JSON.stringify(timestamps));
     } catch (error) {
-        // This can happen if localStorage is disabled, full, or if the stored data is corrupt.
-        // This is a "best-effort" client-side limit, so we will log the error and allow the submission to proceed.
-        console.warn('Could not enforce feedback rate limit:', error);
+        if (error instanceof Error && error.message.startsWith('Rate limit')) {
+            throw error;
+        }
+        // This can happen if localStorage is disabled or full. This is a "best-effort" client-side limit,
+        // so we will log the error and allow the submission to proceed in these edge cases.
+        console.warn(`Could not enforce ${limitName} rate limit:`, error);
     }
 }
 
@@ -105,12 +134,11 @@ function checkAndRecordSubmission() {
  * @param data The feedback data to submit.
  */
 export async function submitFeedback(data: FeedbackData): Promise<void> {
-    checkAndRecordSubmission(); // Throws an error if rate limit is hit, which is caught by the component.
+    checkAndRecord(FEEDBACK_STORAGE_KEY, MAX_FEEDBACK_SUBMISSIONS_PER_HOUR, 'feedback'); 
 
     if (!SCRIPT_URL) {
         console.log('Feedback submission skipped: SCRIPT_URL is not configured.');
         console.log('Simulated feedback data:', data);
-        // Simulate a network delay for UI testing purposes
         await new Promise(resolve => setTimeout(resolve, 500));
         return;
     }
@@ -118,18 +146,64 @@ export async function submitFeedback(data: FeedbackData): Promise<void> {
     try {
         await fetch(SCRIPT_URL, {
             method: 'POST',
-            // Google Apps Script web apps require a workaround for CORS.
-            // Sending as text/plain and letting the script parse it is a common method.
-            // mode: 'no-cors' can also work but prevents reading the response.
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8', 
-            },
-            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(data), // The script defaults to handling feedback
         });
-        // We don't need to process the response, just ensure the request is sent.
     } catch (error) {
         console.error('Failed to submit feedback:', error);
-        // Re-throw the error so the calling component can handle the UI state
         throw error;
+    }
+}
+
+
+/**
+ * Logs a search query along with IP-based geolocation data. This is a fire-and-forget
+ * function that will not block the UI and will fail silently to the console if errors occur.
+ * @param topic The search term that was used.
+ */
+export async function logSearch(topic: string): Promise<void> {
+    try {
+        checkAndRecord(SEARCH_LOG_STORAGE_KEY, MAX_SEARCH_LOGS_PER_HOUR, 'search logs');
+    } catch (e) {
+        console.warn("Search log rate limit exceeded. Skipping log.");
+        return; // Silently exit if rate limited
+    }
+
+    let locationData = {};
+    try {
+        // Use a free, no-key-required geolocation API
+        const response = await fetch('http://ip-api.com/json');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.status === 'success') {
+                locationData = data;
+            }
+        }
+    } catch (error) {
+        console.warn("Could not fetch geolocation data:", error);
+        // Proceed with empty location data on failure
+    }
+    
+    const payload = {
+        type: 'search',
+        topic: topic,
+        location: locationData,
+    };
+
+    if (!SCRIPT_URL) {
+        console.log('Search logging skipped: SCRIPT_URL is not configured.');
+        console.log('Simulated search log data:', payload);
+        return;
+    }
+    
+    try {
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
+        });
+    } catch (error) {
+        // This is a background task, so we just log the error instead of re-throwing it.
+        console.error('Failed to submit search log:', error);
     }
 }
