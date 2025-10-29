@@ -180,7 +180,7 @@ const App: React.FC = () => {
   const handleFeedbackSubmit = async (reason: string) => {
     if (!currentTopic || !currentRating) return;
     try {
-        await submitFeedback({ topic: currentTopic, rating: currentRating, reason: reason });
+        await submitFeedback({ topic: currentTopic, rating: currentRating, reason: reason, output: content });
     } catch (error) {
         console.error("Error submitting feedback:", error);
         throw error;

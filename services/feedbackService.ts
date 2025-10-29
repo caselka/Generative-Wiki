@@ -18,7 +18,7 @@ function doPost(e) {
     
     // Add headers if the sheet is empty
     if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["Timestamp", "Topic", "Rating", "Reason"]);
+      sheet.appendRow(["Timestamp", "Topic", "Rating", "Reason", "Output"]);
     }
     
     var data = JSON.parse(e.postData.contents);
@@ -31,7 +31,7 @@ function doPost(e) {
     }
     
     var timestamp = new Date();
-    sheet.appendRow([timestamp, data.topic, data.rating, data.reason || '']);
+    sheet.appendRow([timestamp, data.topic, data.rating, data.reason || '', data.output || '']);
     
     lock.releaseLock(); // Release the lock
     
@@ -69,6 +69,7 @@ interface FeedbackData {
     topic: string;
     rating: 'up' | 'down';
     reason: string;
+    output: string;
 }
 
 /**
