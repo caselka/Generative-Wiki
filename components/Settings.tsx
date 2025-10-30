@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 import React from 'react';
-import { LanguageCode, languages } from '../i18n';
+import { LanguageCode } from '../i18n';
+import LanguageDropdown from './LanguageDropdown';
 
 interface SettingsProps {
   theme: 'light' | 'dark';
@@ -28,16 +29,7 @@ const MoonIcon: React.FC = () => (
 const Settings: React.FC<SettingsProps> = ({ theme, onThemeToggle, language, onLanguageChange }) => {
   return (
     <div className="settings-container">
-      <select 
-        className="language-select" 
-        value={language} 
-        onChange={(e) => onLanguageChange(e.target.value as LanguageCode)}
-        aria-label="Select language"
-      >
-        {Object.entries(languages).map(([code, name]) => (
-          <option key={code} value={code}>{name}</option>
-        ))}
-      </select>
+      <LanguageDropdown language={language} onLanguageChange={onLanguageChange} />
 
       <button onClick={onThemeToggle} className="theme-toggle" aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>
         {theme === 'light' ? <MoonIcon /> : <SunIcon />}

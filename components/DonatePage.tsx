@@ -3,6 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 import React, { useState } from 'react';
+import { InteractiveText } from './ContentDisplay';
+import { Translation } from '../i18n';
+
+interface DonatePageProps {
+  onWordClick: (word: string) => void;
+  t: Translation;
+}
 
 const CopyIcon: React.FC = () => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -18,7 +25,7 @@ const CheckIcon: React.FC = () => (
 );
 
 
-const CryptoAddress: React.FC<{ name: string; address: string }> = ({ name, address }) => {
+const CryptoAddress: React.FC<{ name: string; address: string; t: Translation }> = ({ name, address, t }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -38,8 +45,8 @@ const CryptoAddress: React.FC<{ name: string; address: string }> = ({ name, addr
       <button 
         onClick={handleCopy} 
         className="copy-button" 
-        aria-label={`Copy ${name} address`} 
-        title={copied ? 'Copied!' : `Copy ${name} address`}
+        aria-label={`${t.donateCopy} ${name} ${t.donateAddress}`}
+        title={copied ? t.donateCopied : `${t.donateCopy} ${name} ${t.donateAddress}`}
       >
         {copied ? <CheckIcon /> : <CopyIcon />}
       </button>
@@ -47,64 +54,64 @@ const CryptoAddress: React.FC<{ name: string; address: string }> = ({ name, addr
   );
 };
 
-const DonatePage: React.FC = () => (
+const DonatePage: React.FC<DonatePageProps> = ({ onWordClick, t }) => (
   <main>
-    <h2>Support the Project</h2>
-    <p>Generative Wiki is a passion project, but it has real-world operational costs. Your support directly contributes to its maintenance and growth, helping to cover expenses and sustain its development.</p>
-    <p>If you find value in this experiment, please consider making a donation. Every contribution, no matter the size, helps keep the servers running and the project evolving.</p>
+    <h2><InteractiveText onWordClick={onWordClick}>{t.donateTitle}</InteractiveText></h2>
+    <p><InteractiveText onWordClick={onWordClick}>{t.donateP1}</InteractiveText></p>
+    <p><InteractiveText onWordClick={onWordClick}>{t.donateP2}</InteractiveText></p>
 
-    <h3 style={{ marginTop: '2.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>Monthly Cost Breakdown (USD)</h3>
+    <h3 style={{ marginTop: '2.5rem', marginBottom: '1.5rem', textAlign: 'center' }}><InteractiveText onWordClick={onWordClick}>{t.donateCostTitle}</InteractiveText></h3>
     <div style={{ maxWidth: '400px', margin: '0 auto' }}>
       <ul style={{ listStyleType: 'none', padding: 0 }}>
         <li style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0' }}>
-          <span>Web Hosting & Domain</span>
+          <span>{t.donateCostItem1}</span>
           <span>$25</span>
         </li>
         <li style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0' }}>
-          <span>Social Account Verification</span>
-          <span>$45 (Est.)</span>
+          <span>{t.donateCostItem2}</span>
+          <span>$45 ({t.donateEstimate})</span>
         </li>
         <li style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0' }}>
-          <span>User Experience Analytics</span>
+          <span>{t.donateCostItem3}</span>
           <span>$25</span>
         </li>
         <li style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)' }}>
-          <span>Basic Marketing</span>
+          <span>{t.donateCostItem4}</span>
           <span>$35</span>
         </li>
         <li style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', fontWeight: 'bold' }}>
-          <span>Service Subtotal</span>
+          <span>{t.donateSubtotal}</span>
           <span>$130</span>
         </li>
       </ul>
       <ul style={{ listStyleType: 'none', padding: 0, marginTop: '1rem' }}>
         <li style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0' }}>
-          <span>Development & Maintenance</span>
+          <span>{t.donateDevCost}</span>
           <span>$5,000+</span>
         </li>
       </ul>
       <ul style={{ listStyleType: 'none', padding: 0, marginTop: '1rem', borderTop: '2px solid var(--text-color)' }}>
          <li style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '1rem', fontWeight: 'bold', fontSize: '1.1em' }}>
-          <span>Total Monthly Cost</span>
+          <span>{t.donateTotal}</span>
           <span>$5,130+</span>
         </li>
       </ul>
     </div>
     
     <p style={{ marginTop: '2.5rem', textAlign: 'center' }}>
-      Your contribution helps cover these costs and ensures the project's longevity.
+      <InteractiveText onWordClick={onWordClick}>{t.donateP3}</InteractiveText>
     </p>
     
     <div style={{ marginTop: '1.5rem', marginBottom: '2.5rem', textAlign: 'center' }}>
       <a href="https://ko-fi.com/caselka" target="_blank" rel="noopener noreferrer" className="donate-button">
-        Support on Ko-fi
+        {t.donateButton}
       </a>
     </div>
 
     <div style={{ fontSize: '0.9em', color: 'var(--text-color-secondary)' }}>
-      <p style={{marginBottom: '1rem'}}><strong>Or via Cryptocurrency:</strong></p>
-      <CryptoAddress name="Bitcoin (BTC)" address="3R1Ha263hJUTc3DWdvvuHYqJxRqC72meAd" />
-      <CryptoAddress name="Ethereum (ETH)" address="0xf923Fc97e9B9F9f159146bd4C74A080b1540c87C" />
+      <p style={{marginBottom: '1rem'}}><strong><InteractiveText onWordClick={onWordClick}>{t.donateCryptoTitle}</InteractiveText></strong></p>
+      <CryptoAddress name="Bitcoin (BTC)" address="3R1Ha263hJUTc3DWdvvuHYqJxRqC72meAd" t={t} />
+      <CryptoAddress name="Ethereum (ETH)" address="0xf923Fc97e9B9F9f159146bd4C74A080b1540c87C" t={t} />
     </div>
   </main>
 );

@@ -1,4 +1,4 @@
-# Generative Wiki - Build Log: Week 1
+# Generative Wiki
 
 > An encyclopedia where every word is a link. Click any word to dive deeper into an endless chain of knowledge, powered by Google's Gemini API.
 
@@ -6,28 +6,27 @@
 
 ---
 
-Week 1 is a wrap and we're officially live! It's been a busy first week laying the foundation and shipping the core experience for Generative Wiki. Our goal was to go from zero to a fully functional, interactive encyclopedia, and we're thrilled with the result.
+## ✨ Features
 
-## ✨ What We Shipped in Week 1
+Generative Wiki is an experimental encyclopedia designed for fluid, associative, and serendipitous learning.
 
-Our focus was on building a polished, feature-complete v1. Here’s a rundown of everything that went live:
-
--   **The "Endless Wiki" Engine**: The core concept is alive and kicking. Every word in a generated definition is a clickable link, powered by real-time streaming from the Gemini API. This creates a fluid, uninterrupted exploration experience.
--   **Discovery Tools**: To kickstart your journey, we added a powerful **Search bar** and a **Random** button. The random button pulls from a large, curated list of interesting, funny, and thought-provoking terms.
--   **Session History**: It's easy to get lost in the wiki rabbit hole, so we built a session **History** list. You can easily see the path you've taken and jump back to any previous topic.
--   **Full Internationalization (i18n)**: From day one, we wanted this to be a global tool. The app is fully translated and generates content in English, Spanish, French, German, and Japanese.
--   **Light & Dark Modes**: We added a theme toggle that respects your system preference but also lets you switch between light and dark modes for comfortable reading.
--   **Robust Feedback Loop**: We set up a simple but effective curation system. Users can give a thumbs-up/down to any generation and provide optional text feedback, which is piped directly into a Google Sheet via Apps Script for easy analysis.
--   **Core Static Pages**: We rounded out the user experience with an **About** page to explain the project and a **Donate** page to help support its operational costs.
-
-## 🚀 What's Next for Week 2?
-
-With the foundation in place, we'll be focusing on refinement and new features. We're thinking about UI/UX improvements, exploring different content formats, and potentially adding ways for users to share their discovery paths. Stay tuned!
+-   **Endless Exploration**: The core concept of the wiki. Every word on every page is a clickable hyperlink that generates a new definition in real-time, creating an endless web of knowledge.
+-   **Multi-Word Search**: Go beyond single words. Click and drag to highlight any phrase to instantly search for it via a popup.
+-   **Deep Dive Content**: After getting a concise initial definition, use the **Search Deeper** button to get a comprehensive, well-structured article synthesized from multiple web sources using a more powerful AI model.
+-   **Complete Discovery Toolkit**: Start your journey with a powerful **Search bar** for any topic or use the **Random** button for serendipitous discovery from a large, curated list of interesting terms.
+-   **Session History**: Easily track your exploration path. The **History** list lets you see every topic you've visited and jump back to any of them instantly.
+-   **Global Reach**: The interface and generated content are available in multiple languages, including English, Spanish, French, German, Japanese, Mandarin Chinese, and Arabic, with full right-to-left (RTL) support.
+-   **User-Focused UI/UX**:
+    -   **Light & Dark Modes**: Choose your preferred reading mode. The app respects your system settings and offers a manual toggle.
+    -   **Responsive Design**: A clean, readable interface that works seamlessly on desktop and mobile devices.
+    -   **Performance**: Initial definitions are streamed from a highly optimized model (`gemini-flash-lite-latest`) for near-instant loading.
+-   **Curation & Feedback**: Help improve the wiki by rating each generation with a thumbs-up or down. Optional text feedback is collected to enhance content quality.
+-   **Comprehensive Documentation**: A full **Docs** page explains all features, the technology behind the project, and includes a detailed changelog.
 
 ## 🛠️ Tech Stack
 
 -   **Frontend**: React, TypeScript
--   **AI Model**: Google Gemini API (`@google/genai`)
+-   **AI Model**: Google Gemini API (`@google/genai`), using `gemini-flash-lite-latest` for speed and `gemini-2.5-pro` for deep searches.
 -   **Styling**: Plain CSS with CSS Variables for easy theming.
 -   **Dependencies**: Served via ESM (`esm.sh`) for a build-less development experience.
 

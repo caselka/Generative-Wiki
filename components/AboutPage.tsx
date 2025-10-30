@@ -3,14 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 import React from 'react';
+import { InteractiveText } from './ContentDisplay';
+import { Translation } from '../i18n';
 
-const AboutPage: React.FC = () => (
+interface AboutPageProps {
+  onWordClick: (word: string) => void;
+  t: Translation;
+}
+
+const AboutPage: React.FC<AboutPageProps> = ({ onWordClick, t }) => (
   <main>
-    <h2>About Generative Wiki</h2>
-    <p>Generative Wiki is an exploration of knowledge and creativity, powered by Google's Gemini models.</p>
-    <p>Unlike a traditional encyclopedia, every word on this site is a hyperlink. Clicking on a word generates a new definition in real-time, creating an endless, interconnected web of information.</p>
-    <p>This project was created by <a href="https://github.com/caselka" target="_blank" rel="noopener noreferrer">Caselka</a> as a way to visualize the vast, associative nature of generative AI and create a unique, interactive reading experience.</p>
-    <p>The front-end is built with React and TypeScript, and it leverages the streaming capabilities of the Gemini API to deliver content as quickly as possible.</p>
+    <h2><InteractiveText onWordClick={onWordClick}>{t.aboutTitle}</InteractiveText></h2>
+    <p><InteractiveText onWordClick={onWordClick}>{t.aboutP1}</InteractiveText></p>
+    <p><InteractiveText onWordClick={onWordClick}>{t.aboutP2}</InteractiveText></p>
+    <p><InteractiveText onWordClick={onWordClick}>{t.aboutP3_1}</InteractiveText> <a href="https://github.com/caselka" target="_blank" rel="noopener noreferrer">Caselka</a> <InteractiveText onWordClick={onWordClick}>{t.aboutP3_2}</InteractiveText></p>
+    <p><InteractiveText onWordClick={onWordClick}>{t.aboutP4}</InteractiveText></p>
   </main>
 );
 

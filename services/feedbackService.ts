@@ -3,34 +3,76 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-// README: How to set up your feedback and logging database with Google Sheets.
+// README: How to Set Up Your Feedback & Logging Database
+//
+// This Google Apps Script creates and manages TWO separate sheets in your Google Sheet document:
+// 1. 'Feedback': Captures all user-submitted ratings (👍/👎), optional text feedback,
+//    the generated content that was rated, whether "Deep Search" was used, and the user's location data.
+// 2. 'Search Logs': Captures every search query and "Deep Search" action, along with a timestamp and approximate location.
+//
+// STEPS:
 // 1. Create a new Google Sheet.
 // 2. Go to Extensions > Apps Script.
-// 3. Paste the following code into the script editor and save it. This script
-//    will automatically create and manage two sheets: 'Feedback' and 'Search Logs'.
+// 3. Paste the following code into the script editor and save it.
 /*
 function doPost(e) {
+  // This check prevents errors when the script is run manually from the editor.
+  if (!e || !e.postData || !e.postData.contents) {
+    var manualRunMessage = "This function is designed to be triggered by a POST request from the web app. If you are running it manually for testing, this message is expected.";
+    console.log(manualRunMessage);
+    return ContentService
+      .createTextOutput(JSON.stringify({ "status": "info", "message": manualRunMessage }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var lock = LockService.getScriptLock();
   try {
-    // Best practice: Lock the script to prevent concurrent modifications
-    var lock = LockService.getScriptLock();
     lock.waitLock(30000); // Wait up to 30 seconds
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var data = JSON.parse(e.postData.contents);
     var timestamp = new Date();
+    var loc = data.location || {};
 
-    if (data.type === 'search') {
+    if (data.type === 'search' || data.type === 'deep_search') {
       var searchSheetName = 'Search Logs';
       var sheet = ss.getSheetByName(searchSheetName);
+      var expectedHeaders = ["Timestamp", "Topic", "Deep Search Used", "IP Address", "Country", "Region", "City", "Latitude", "Longitude", "ISP", "Organization"];
+      var needsMigration = false;
+      
       if (!sheet) {
         sheet = ss.insertSheet(searchSheetName);
-        sheet.appendRow(["Timestamp", "Topic", "IP Address", "Country", "Region", "City", "Latitude", "Longitude", "ISP", "Organization"]);
+        sheet.appendRow(expectedHeaders);
+      } else if (sheet.getLastRow() > 0) {
+        var currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        if (currentHeaders.length < 3 || currentHeaders[2] !== 'Deep Search Used') {
+          needsMigration = true;
+        }
+      } else { // Sheet is empty
+        sheet.clear();
+        sheet.appendRow(expectedHeaders);
       }
-      var loc = data.location || {};
+
+      if (needsMigration) {
+          var oldSheetName = searchSheetName + '_old_' + new Date().toISOString().slice(0, 10).replace(/-/g,"");
+          var i = 1;
+          while (ss.getSheetByName(oldSheetName)) {
+              oldSheetName = searchSheetName + '_old_' + new Date().toISOString().slice(0, 10).replace(/-/g,"") + '_' + i;
+              i++;
+          }
+          sheet.setName(oldSheetName);
+          
+          sheet = ss.insertSheet(searchSheetName, 0);
+          sheet.appendRow(expectedHeaders);
+      }
+
+      var deepSearchUsed = data.type === 'deep_search' ? 'Yes' : 'No';
+
       sheet.appendRow([
         timestamp,
         data.topic,
-        loc.query || 'N/A',
+        deepSearchUsed,
+        loc.ip || 'N/A',
         loc.country || 'N/A',
         loc.regionName || 'N/A',
         loc.city || 'N/A',
@@ -43,33 +85,70 @@ function doPost(e) {
     } else { // Handle feedback (default)
       var feedbackSheetName = 'Feedback';
       var sheet = ss.getSheetByName(feedbackSheetName);
+      var expectedFeedbackHeaders = ["Timestamp", "Topic", "Rating", "Reason", "Initial Definition", "Deep Search Used", "Expanded Article", "IP Address", "Country", "Region", "City", "Latitude", "Longitude", "ISP", "Organization"];
+      var needsFeedbackMigration = false;
+
       if (!sheet) {
-        sheet = ss.insertSheet(feedbackSheetName, 0); // Insert at the first position
-        sheet.appendRow(["Timestamp", "Topic", "Rating", "Reason", "Output"]);
-      } else if (sheet.getLastRow() === 0) {
-         // Add headers if sheet exists but is empty
-        sheet.appendRow(["Timestamp", "Topic", "Rating", "Reason", "Output"]);
+        sheet = ss.insertSheet(feedbackSheetName, 0);
+        sheet.appendRow(expectedFeedbackHeaders);
+      } else if (sheet.getLastRow() > 0) {
+        var currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        if (currentHeaders.length < 8 || currentHeaders[7] !== "IP Address") {
+           needsFeedbackMigration = true;
+        }
+      } else {
+        sheet.appendRow(expectedFeedbackHeaders);
+      }
+      
+      if (needsFeedbackMigration) {
+        var oldSheetName = feedbackSheetName + '_old_' + new Date().toISOString().slice(0, 10).replace(/-/g,"");
+        var i = 1;
+        while (ss.getSheetByName(oldSheetName)) {
+            oldSheetName = feedbackSheetName + '_old_' + new Date().toISOString().slice(0, 10).replace(/-/g,"") + '_' + i;
+            i++;
+        }
+        sheet.setName(oldSheetName);
+        sheet = ss.insertSheet(feedbackSheetName, 0);
+        sheet.appendRow(expectedFeedbackHeaders);
       }
       
       if (!data.topic || !data.rating) {
         throw new Error("Missing required feedback fields: topic and rating.");
       }
-      sheet.appendRow([timestamp, data.topic, data.rating, data.reason || '', data.output || '']);
+      var deepSearchUsed = data.wasDeepSearchUsed ? 'Yes' : 'No';
+      
+      sheet.appendRow([
+          timestamp, 
+          data.topic, 
+          data.rating, 
+          data.reason || '', 
+          data.definition || '',
+          deepSearchUsed,
+          data.expandedArticle || '',
+          loc.ip || 'N/A',
+          loc.country || 'N/A',
+          loc.regionName || 'N/A',
+          loc.city || 'N/A',
+          loc.lat || 'N/A',
+          loc.lon || 'N/A',
+          loc.isp || 'N/A',
+          loc.org || 'N/A'
+      ]);
     }
-    
-    lock.releaseLock();
     
     return ContentService
       .createTextOutput(JSON.stringify({ "status": "success" }))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
-    if (lock && lock.hasLock()) {
-      lock.releaseLock();
-    }
+    console.error(error.toString());
     return ContentService
       .createTextOutput(JSON.stringify({ "status": "error", "message": error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    if (lock && lock.hasLock()) {
+      lock.releaseLock();
+    }
   }
 }
 */
@@ -97,7 +176,9 @@ interface FeedbackData {
     topic: string;
     rating: 'up' | 'down';
     reason: string;
-    output: string;
+    definition: string;
+    expandedArticle: string;
+    wasDeepSearchUsed: boolean;
 }
 
 /**
@@ -137,10 +218,13 @@ function checkAndRecord(storageKey: string, maxPerHour: number, limitName: strin
  */
 export async function submitFeedback(data: FeedbackData): Promise<void> {
     checkAndRecord(FEEDBACK_STORAGE_KEY, MAX_FEEDBACK_SUBMISSIONS_PER_HOUR, 'feedback'); 
+    
+    const locationData = await getGeolocationData();
+    const payload = { ...data, location: locationData };
 
     if (!SCRIPT_URL) {
         console.log('Feedback submission skipped: SCRIPT_URL is not configured.');
-        console.log('Simulated feedback data:', data);
+        console.log('Simulated feedback data:', payload);
         await new Promise(resolve => setTimeout(resolve, 500));
         return;
     }
@@ -149,7 +233,7 @@ export async function submitFeedback(data: FeedbackData): Promise<void> {
         await fetch(SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(data), // The script defaults to handling feedback
+            body: JSON.stringify(payload), // The script defaults to handling feedback
         });
     } catch (error) {
         console.error('Failed to submit feedback:', error);
@@ -172,7 +256,7 @@ async function getGeolocationData(): Promise<Record<string, any>> {
     }
 
     try {
-        const response = await fetch('https://ipapi.co/json/');
+        const response = await fetch('https://ipapi.co/json/?key=EOh0COlyp0yo5giaRQ1dX9lJRWC6ZdV4DfV2a55DiH539UVNDe');
         if (!response.ok) {
             console.warn(`Geolocation API responded with status: ${response.status}`);
             return {};
@@ -186,7 +270,7 @@ async function getGeolocationData(): Promise<Record<string, any>> {
         }
 
         const locationData = {
-            query: data.ip || 'N/A',
+            ip: data.ip || 'N/A',
             country: data.country_name || 'N/A',
             regionName: data.region || 'N/A',
             city: data.city || 'N/A',
@@ -210,13 +294,12 @@ async function getGeolocationData(): Promise<Record<string, any>> {
     }
 }
 
-
 /**
- * Logs a search query along with IP-based geolocation data. This is a fire-and-forget
- * function that will not block the UI and will fail silently to the console if errors occur.
- * @param topic The search term that was used.
+ * Logs a generic search-related event. This is a fire-and-forget function.
+ * @param type The type of event ('search' or 'deep_search').
+ * @param topic The search term associated with the event.
  */
-export async function logSearch(topic: string): Promise<void> {
+async function logGenericSearchEvent(type: 'search' | 'deep_search', topic: string): Promise<void> {
     try {
         checkAndRecord(SEARCH_LOG_STORAGE_KEY, MAX_SEARCH_LOGS_PER_HOUR, 'search logs');
     } catch (e) {
@@ -227,13 +310,13 @@ export async function logSearch(topic: string): Promise<void> {
     const locationData = await getGeolocationData();
     
     const payload = {
-        type: 'search',
+        type: type,
         topic: topic,
         location: locationData,
     };
 
     if (!SCRIPT_URL) {
-        console.log('Search logging skipped: SCRIPT_URL is not configured.');
+        console.log(`Search logging skipped (${type}): SCRIPT_URL is not configured.`);
         console.log('Simulated search log data:', payload);
         return;
     }
@@ -248,4 +331,21 @@ export async function logSearch(topic: string): Promise<void> {
         // This is a background task, so we just log the error instead of re-throwing it.
         console.error('Failed to submit search log:', error);
     }
+}
+
+
+/**
+ * Logs a standard search query.
+ * @param topic The search term that was used.
+ */
+export async function logSearch(topic: string): Promise<void> {
+    await logGenericSearchEvent('search', topic);
+}
+
+/**
+ * Logs when a "Deep Search" action is performed on a topic.
+ * @param topic The topic that was searched deeper.
+ */
+export async function logDeepSearch(topic: string): Promise<void> {
+    await logGenericSearchEvent('deep_search', topic);
 }
