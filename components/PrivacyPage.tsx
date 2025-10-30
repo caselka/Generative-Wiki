@@ -38,7 +38,7 @@ const PrivacyPage: React.FC = () => (
     <p>We use the following third-party services:</p>
     <ul style={{ marginLeft: '2rem', marginTop: '0.5rem', marginBottom: '1rem' }}>
       <li><strong>Google Gemini API:</strong> Generates AI-powered definitions. Your searches are sent to Google's servers to generate content.</li>
-      <li><strong>ip-api.com:</strong> Provides geolocation data based on your IP address for analytics purposes.</li>
+      <li><strong>ipapi.co:</strong> Provides geolocation data based on your IP address for analytics purposes.</li>
     </ul>
     
     <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Data Storage</h3>

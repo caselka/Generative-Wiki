@@ -80,7 +80,7 @@ function doPost(e) {
 // 8. Click Deploy. Authorize the script when prompted.
 // 9. Copy the Web app URL and paste it into the SCRIPT_URL variable below.
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwLDzlDy_uKUnvOGIXKCsV3KYKnq3tSPfuKPJbUQV_8oCX7cPMwG4bcftCX7X6txMQ/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPxU4kU9ReakOVbcCVfpC968bF3Jn_N6TnyTpJfSBNv_n_mEepXdIaVJ5XKlKVZETj/exec';
 
 // --- Client-side rate limiting to prevent abuse ---
 const ONE_HOUR_IN_MS = 60 * 60 * 1000;
@@ -90,6 +90,8 @@ const FEEDBACK_STORAGE_KEY = 'feedbackSubmissions';
 
 const MAX_SEARCH_LOGS_PER_HOUR = 100;
 const SEARCH_LOG_STORAGE_KEY = 'searchLogSubmissions';
+
+const GEOLOCATION_CACHE_KEY = 'geolocationData';
 
 interface FeedbackData {
     topic: string;
@@ -155,6 +157,59 @@ export async function submitFeedback(data: FeedbackData): Promise<void> {
     }
 }
 
+/**
+ * Fetches geolocation data, caching the result in sessionStorage to minimize API calls.
+ * @returns A promise that resolves to the location data object or an empty object on failure.
+ */
+async function getGeolocationData(): Promise<Record<string, any>> {
+    try {
+        const cachedData = sessionStorage.getItem(GEOLOCATION_CACHE_KEY);
+        if (cachedData) {
+            return JSON.parse(cachedData);
+        }
+    } catch (error) {
+        console.warn("Could not read from sessionStorage:", error);
+    }
+
+    try {
+        const response = await fetch('https://ipapi.co/json/');
+        if (!response.ok) {
+            console.warn(`Geolocation API responded with status: ${response.status}`);
+            return {};
+        }
+
+        const data = await response.json();
+        if (data.error) {
+            console.warn(`Geolocation API returned an error: ${data.reason}`);
+            // Don't cache error responses as they may be temporary (e.g. rate limit)
+            return {};
+        }
+
+        const locationData = {
+            query: data.ip || 'N/A',
+            country: data.country_name || 'N/A',
+            regionName: data.region || 'N/A',
+            city: data.city || 'N/A',
+            lat: data.latitude || 'N/A',
+            lon: data.longitude || 'N/A',
+            isp: data.org || 'N/A',
+            org: data.org || 'N/A',
+        };
+
+        try {
+            sessionStorage.setItem(GEOLOCATION_CACHE_KEY, JSON.stringify(locationData));
+        } catch (error) {
+            console.warn("Could not write to sessionStorage:", error);
+        }
+        
+        return locationData;
+
+    } catch (error) {
+        console.warn("Could not fetch geolocation data:", error);
+        return {};
+    }
+}
+
 
 /**
  * Logs a search query along with IP-based geolocation data. This is a fire-and-forget
@@ -169,20 +224,7 @@ export async function logSearch(topic: string): Promise<void> {
         return; // Silently exit if rate limited
     }
 
-    let locationData = {};
-    try {
-        // Use a free, no-key-required geolocation API over HTTPS
-        const response = await fetch('https://ip-api.com/json');
-        if (response.ok) {
-            const data = await response.json();
-            if (data.status === 'success') {
-                locationData = data;
-            }
-        }
-    } catch (error) {
-        console.warn("Could not fetch geolocation data:", error);
-        // Proceed with empty location data on failure
-    }
+    const locationData = await getGeolocationData();
     
     const payload = {
         type: 'search',
