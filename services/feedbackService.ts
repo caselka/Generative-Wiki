@@ -171,8 +171,8 @@ export async function logSearch(topic: string): Promise<void> {
 
     let locationData = {};
     try {
-        // Use a free, no-key-required geolocation API
-        const response = await fetch('http://ip-api.com/json');
+        // Use a free, no-key-required geolocation API over HTTPS
+        const response = await fetch('https://ip-api.com/json');
         if (response.ok) {
             const data = await response.json();
             if (data.status === 'success') {

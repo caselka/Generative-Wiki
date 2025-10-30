@@ -11,6 +11,7 @@ import SearchBar from './components/SearchBar';
 import LoadingSkeleton from './components/LoadingSkeleton';
 import AboutPage from './components/AboutPage';
 import DonatePage from './components/DonatePage';
+import PrivacyPage from './components/PrivacyPage';
 import WelcomeScreen from './components/WelcomeScreen';
 import CurationControls from './components/CurationControls';
 import Settings from './components/Settings';
@@ -144,9 +145,6 @@ const App: React.FC = () => {
     const trimmedTopic = newTopic.trim();
     if (!trimmedTopic || trimmedTopic.toLowerCase() === currentTopic.toLowerCase()) return;
     
-    // Fire-and-forget logging call
-    logSearch(trimmedTopic);
-
     let newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(trimmedTopic);
 
@@ -156,6 +154,8 @@ const App: React.FC = () => {
     
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
+    
+    logSearch(trimmedTopic);
   }, [history, historyIndex, currentTopic]);
 
   const handleWordClick = useCallback((word: string) => { navigateToTopic(word); }, [navigateToTopic]);
@@ -201,7 +201,7 @@ const App: React.FC = () => {
       <>
         <main>
           <div>
-            <h1 style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold' }}>{currentTopic}</h1>
+            <h1>{currentTopic}</h1>
             {error && (
               <div style={{ border: '1px solid #cc0000', padding: '1rem', color: '#cc0000' }}>
                 <p style={{ margin: 0 }}>{t.errorOccurred}</p>
@@ -245,6 +245,7 @@ const App: React.FC = () => {
     switch(page) {
       case 'about': return <AboutPage />;
       case 'donate': return <DonatePage />;
+      case 'privacy': return <PrivacyPage />;
       default: return renderWikiContent();
     }
   };
@@ -263,7 +264,7 @@ const App: React.FC = () => {
       {renderPage()}
 
       <footer className="sticky-footer">
-        <p className="footer-text" style={{ margin: 0 }}>
+        <p className="footer-text">
           {t.footerText} <a href="https://github.com/caselka" target="_blank" rel="noopener noreferrer">Caselka</a>
           {page === 'wiki' && currentTopic && generationTime && ` · ${Math.round(generationTime)}ms`}
         </p>
@@ -271,6 +272,9 @@ const App: React.FC = () => {
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('wiki'); }}>{t.navWiki}</a>
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('about'); }}>{t.navAbout}</a>
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('donate'); }}>{t.navDonate}</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('privacy'); }}>{t.navPrivacy}</a>
+            <a href="https://github.com/caselka/Generative-Wiki" target="_blank" rel="noopener noreferrer">{t.navGitHub}</a>
+            <a href="https://x.com/GenerativeWiki" target="_blank" rel="noopener noreferrer">{t.navX}</a>
         </nav>
         <Settings
           theme={theme}

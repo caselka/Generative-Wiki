@@ -1,22 +1,28 @@
-# Generative Wiki
+# Generative Wiki - Build Log: Week 1
 
 > An encyclopedia where every word is a link. Click any word to dive deeper into an endless chain of knowledge, powered by Google's Gemini API.
 
 [**Live Site → GenerativeWiki.com**](https://generativewiki.com)
 
-Generative Wiki is an exploration of knowledge and creativity. Unlike a traditional encyclopedia, every word on this site is a hyperlink. Clicking on a word generates a new definition in real-time, creating an endless, interconnected web of information.
+---
 
-This project was created by [Caselka](https://github.com/caselka) as a way to visualize the vast, associative nature of generative AI and create a unique, interactive reading experience.
+Week 1 is a wrap and we're officially live! It's been a busy first week laying the foundation and shipping the core experience for Generative Wiki. Our goal was to go from zero to a fully functional, interactive encyclopedia, and we're thrilled with the result.
 
-## ✨ Features
+## ✨ What We Shipped in Week 1
 
--   **Interactive Exploration**: Every word in a definition is clickable, generating a new definition on the fly.
--   **Real-time Generation**: Content is generated and streamed directly from the Gemini API for a responsive experience.
--   **Random Topic Discovery**: A "Random" button helps you discover new and interesting concepts from a curated list.
--   **Multilingual Support**: The interface and generated content can be switched between English, Spanish, French, German, and Japanese.
--   **Light & Dark Mode**: A comfortable viewing experience in any lighting condition.
--   **User Feedback**: An integrated system allows users to rate generations and provide qualitative feedback.
--   **Navigation History**: Easily track and revisit topics you've explored in your current session.
+Our focus was on building a polished, feature-complete v1. Here’s a rundown of everything that went live:
+
+-   **The "Endless Wiki" Engine**: The core concept is alive and kicking. Every word in a generated definition is a clickable link, powered by real-time streaming from the Gemini API. This creates a fluid, uninterrupted exploration experience.
+-   **Discovery Tools**: To kickstart your journey, we added a powerful **Search bar** and a **Random** button. The random button pulls from a large, curated list of interesting, funny, and thought-provoking terms.
+-   **Session History**: It's easy to get lost in the wiki rabbit hole, so we built a session **History** list. You can easily see the path you've taken and jump back to any previous topic.
+-   **Full Internationalization (i18n)**: From day one, we wanted this to be a global tool. The app is fully translated and generates content in English, Spanish, French, German, and Japanese.
+-   **Light & Dark Modes**: We added a theme toggle that respects your system preference but also lets you switch between light and dark modes for comfortable reading.
+-   **Robust Feedback Loop**: We set up a simple but effective curation system. Users can give a thumbs-up/down to any generation and provide optional text feedback, which is piped directly into a Google Sheet via Apps Script for easy analysis.
+-   **Core Static Pages**: We rounded out the user experience with an **About** page to explain the project and a **Donate** page to help support its operational costs.
+
+## 🚀 What's Next for Week 2?
+
+With the foundation in place, we'll be focusing on refinement and new features. We're thinking about UI/UX improvements, exploring different content formats, and potentially adding ways for users to share their discovery paths. Stay tuned!
 
 ## 🛠️ Tech Stack
 

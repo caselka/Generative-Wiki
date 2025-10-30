@@ -6,7 +6,7 @@ import React from 'react';
 
 const DonatePage: React.FC = () => (
   <main>
-    <h2 style={{ marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Support the Project</h2>
+    <h2>Support the Project</h2>
     <p>Generative Wiki is a personal project. Running it incurs real costs for API usage and hosting.</p>
     <p>If you enjoy using the site and want to support its continued development, please consider making a donation. Any amount is greatly appreciated and helps keep this experiment online.</p>
     <p>For broad accessibility, you can use a platform like Ko-fi, which is simple and secure for one-time contributions. Cryptocurrency is also a great option for global, decentralized support.</p>
