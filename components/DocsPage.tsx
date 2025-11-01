@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { InteractiveText } from './ContentDisplay';
 import { Translation, getUpdatesLog, getDocsContent } from '../i18n';
 
@@ -55,13 +55,13 @@ const DocsPage: React.FC<DocsPageProps> = ({ hasNewUpdate, onMarkUpdateAsSeen, o
 
   const [expandedTechDetails, setExpandedTechDetails] = useState<Set<string>>(new Set(UPDATES_LOG.map(u => u.id)));
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeSection]);
+
   const handleNavClick = (section: SectionKey, event: React.MouseEvent) => {
     event.preventDefault();
     setActiveSection(section);
-    const contentElement = document.getElementById('docs-content');
-    if (contentElement) {
-        contentElement.scrollTop = 0;
-    }
     if (section === 'updates') {
       onMarkUpdateAsSeen();
     }

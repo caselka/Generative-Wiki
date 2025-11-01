@@ -174,6 +174,24 @@ const translations = {
         },
         updatesLog: [
             {
+                id: '20251101', date: 'November 1, 2025', version: 'Version 1.3.1',
+                summary: "This update focuses on accuracy, safety, user experience, and stability. It introduces more accurate definitions for uncommon topics, a proactive safety system for sensitive queries, animated loading states, and critical bug fixes for math rendering and synonym generation.",
+                details: [
+                    "**Improved Accuracy:** Enhanced the AI's reasoning for uncommon topics by allocating a 'thinking budget' for the initial search, providing more accurate definitions without requiring a 'Search Deeper' action.",
+                    "**Proactive User Safety:** Implemented a new safety system that detects sensitive topics, displays a prominent warning with localized support hotlines (based on user's region), and instructs the AI to include helpful resources in its responses.",
+                    "**Enhanced Loading Experience:** Replaced static loading bars with a subtle, pulsing animation for better visual feedback during content generation.",
+                    "**Critical Bug Fix:** Resolved an application-breaking error with the `react-katex` library, ensuring content with mathematical formulas (LaTeX) loads correctly.",
+                    "**Critical Bug Fix:** Resolved an application crash that occurred when the synonym generation API returned an empty or blocked response. The app now gracefully handles these cases, displaying a '(No synonyms found)' message instead of failing."
+                ],
+                technicalDetails: [
+                    "**Dynamic Thinking Budget:** The `streamDefinition` service allocates a thinking budget to the `gemini-2.5-flash` model for topics not found in a predefined list to improve initial definition quality.",
+                    "**Safety Pre-check:** Integrated a location-aware `checkTopicSafety` call in `App.tsx` before fetching content to detect sensitive queries and provide region-specific support.",
+                    "**CSS Animation:** Implemented a pure CSS `pulse` animation for the `LoadingSkeleton` component with staggered delays for a wave effect.",
+                    "**Module & Prop Fixes:** Corrected the `react-katex` import in `ContentDisplay.tsx` to resolve a CDN module loading error and fixed incorrect prop passing to the `InlineMath` component.",
+                    "**Robust Error Handling:** Implemented a defensive check in the `getSynonyms` service to verify that the API response contains text content before processing. If `response.text` is `undefined`, the function now returns an empty array, preventing the `trim()` method from being called on a null value."
+                ]
+            },
+            {
               id: '20251030', date: 'October 30, 2025', version: 'Version 1.3.0',
               summary: "Version 1.3.0 is a major update focusing on interactivity and global access. It transforms the entire site into a clickable wiki, adds support for Mandarin Chinese and Arabic, streamlines content exploration, adds a full discovery toolkit, and includes major performance optimizations.",
               details: [
@@ -365,6 +383,24 @@ const translations = {
             },
         },
         updatesLog: [
+            {
+                id: '20251101', date: '1 de noviembre de 2025', version: 'Versión 1.3.1',
+                summary: "Esta actualización se centra en la precisión, la seguridad, la experiencia del usuario y la estabilidad. Introduce definiciones más precisas para temas poco comunes, un sistema de seguridad proactivo para consultas sensibles, estados de carga animados y correcciones de errores críticos para el renderizado de matemáticas y la generación de sinónimos.",
+                details: [
+                    "**Precisión Mejorada:** Se mejoró el razonamiento de la IA para temas poco comunes asignando un 'presupuesto de pensamiento' para la búsqueda inicial, proporcionando definiciones más precisas sin necesidad de una 'Búsqueda Profunda'.",
+                    "**Seguridad Proactiva del Usuario:** Se implementó un nuevo sistema de seguridad que detecta temas sensibles, muestra una advertencia prominente con líneas de ayuda localizadas (según la región del usuario) e instruye a la IA para que incluya recursos útiles en sus respuestas.",
+                    "**Experiencia de Carga Mejorada:** Se reemplazaron las barras de carga estáticas con una sutil animación de pulso, proporcionando una mejor retroalimentación visual mientras se genera el contenido.",
+                    "**Corrección de Error Crítico:** Se resolvió un error que rompía la aplicación con la biblioteca `react-katex`, asegurando que el contenido que contiene fórmulas matemáticas (LaTeX) ahora se cargue correctamente sin fallar.",
+                    "**Corrección de Error Crítico:** Se resolvió un bloqueo de la aplicación que ocurría cuando la API de generación de sinónimos devolvía una respuesta vacía o bloqueada. La aplicación ahora maneja estos casos de forma elegante, mostrando un mensaje '(No se encontraron sinónimos)' en lugar de fallar."
+                ],
+                technicalDetails: [
+                    "**Presupuesto de Pensamiento Dinámico:** El servicio `streamDefinition` asigna un presupuesto de pensamiento al modelo `gemini-2.5-flash` para temas que no se encuentran en una lista predefinida para mejorar la calidad de la definición inicial.",
+                    "**Verificación Previa de Seguridad:** Se integró una llamada a `checkTopicSafety` consciente de la ubicación en `App.tsx` antes de obtener el contenido para detectar consultas sensibles y proporcionar apoyo específico de la región.",
+                    "**Animación CSS:** Se implementó una animación de `pulso` CSS pura para el componente `LoadingSkeleton`. El `animation-delay` escalonado en los selectores `nth-child` crea un efecto de onda visualmente agradable.",
+                    "**Validación de Props y Módulos:** Se corrigió la importación de `react-katex` en `ContentDisplay.tsx` para resolver un `SyntaxError` causado por problemas de carga del módulo desde la CDN, y se corrigió el paso incorrecto de props al componente `InlineMath`.",
+                    "**Manejo de Errores Robusto:** Se implementó una verificación defensiva en el servicio `getSynonyms` para verificar que la respuesta de la API contenga contenido de texto antes de procesarlo. Si `response.text` es `undefined`, la función ahora devuelve un arreglo vacío, evitando que se llame al método `trim()` en un valor nulo."
+                ]
+            },
             {
               id: '20251030', date: '30 de octubre de 2025', version: 'Versión 1.3.0',
               summary: "La versión 1.3.0 es una actualización importante centrada en la interactividad y el acceso global. Transforma todo el sitio en una wiki clicable, añade soporte para chino mandarín y árabe, agiliza la exploración de contenido, añade un kit de herramientas de descubrimiento completo e incluye importantes optimizaciones de rendimiento.",
@@ -558,6 +594,24 @@ const translations = {
         },
         updatesLog: [
             {
+                id: '20251101', date: '1 novembre 2025', version: 'Version 1.3.1',
+                summary: "Cette mise à jour se concentre sur la précision, la sécurité, l'expérience utilisateur et la stabilité. Elle introduit des définitions plus précises pour les sujets peu courants, un système de sécurité proactif pour les requêtes sensibles, des états de chargement animés et des corrections de bugs critiques pour le rendu mathématique et la génération de synonymes.",
+                details: [
+                    "**Précision Améliorée :** Amélioration du raisonnement de l'IA pour les sujets peu courants en allouant un 'budget de réflexion' pour la recherche initiale, fournissant des définitions plus précises sans nécessiter une 'Recherche Approfondie'.",
+                    "**Sécurité Proactive de l'Utilisateur :** Implémentation d'un nouveau système de sécurité qui détecte les sujets sensibles, affiche un avertissement bien visible avec des lignes d'assistance localisées (en fonction de la région de l'utilisateur) et demande à l'IA d'inclure des ressources utiles dans ses réponses.",
+                    "**Expérience de Chargement Améliorée :** Remplacement des barres de chargement statiques par une animation de pulsation subtile, offrant un meilleur retour visuel pendant la génération du contenu.",
+                    "**Correction de Bogue Critique :** Résolution d'une erreur bloquant l'application avec la bibliothèque `react-katex`, garantissant que le contenu contenant des formules mathématiques (LaTeX) se charge désormais correctement sans planter.",
+                    "**Correction de Bogue Critique :** Résolution d'un plantage de l'application qui se produisait lorsque l'API de génération de synonymes renvoyait une réponse vide ou bloquée. L'application gère désormais ces cas avec élégance, affichant un message '(Aucun synonyme trouvé)' au lieu de planter."
+                ],
+                technicalDetails: [
+                    "**Budget de Réflexion Dynamique :** Le service `streamDefinition` alloue un budget de réflexion au modèle `gemini-2.5-flash` pour les sujets non trouvés dans une liste prédéfinie afin d'améliorer la qualité de la définition initiale.",
+                    "**Vérification de Sécurité Préalable :** Intégration d'un appel à `checkTopicSafety` sensible à la localisation dans `App.tsx` avant de récupérer le contenu pour détecter les requêtes sensibles et fournir un soutien spécifique à la région.",
+                    "**Animation CSS :** Implémentation d'une animation `pulse` en CSS pur pour le composant `LoadingSkeleton` avec des délais décalés pour un effet de vague.",
+                    "**Corrections de Module et de Props :** Correction de l'importation de `react-katex` dans `ContentDisplay.tsx` pour résoudre une erreur de chargement de module CDN et correction de la transmission incorrecte de props au composant `InlineMath`.",
+                    "**Gestion Robuste des Erreurs :** Implémentation d'une vérification défensive dans le service `getSynonyms` pour s'assurer que la réponse de l'API contient du contenu textuel avant de la traiter. Si `response.text` est `undefined`, la fonction renvoie maintenant un tableau vide, empêchant l'appel de la méthode `trim()` sur une valeur nulle."
+                ]
+            },
+            {
               id: '20251030', date: '30 octobre 2025', version: 'Version 1.3.0',
               summary: "La version 1.3.0 est une mise à jour majeure axée sur l'interactivité et l'accès mondial. Elle transforme l'ensemble du site en un wiki cliquable, ajoute le support du chinois mandarin et de l'arabe, rationalise l'exploration du contenu, ajoute une boîte à outils de découverte complète et inclut des optimisations de performances majeures.",
               details: [
@@ -750,6 +804,24 @@ const translations = {
         },
         updatesLog: [
             {
+                id: '20251101', date: '1. November 2025', version: 'Version 1.3.1',
+                summary: "Dieses Update konzentriert sich auf Genauigkeit, Sicherheit, Benutzererfahrung und Stabilität. Es führt genauere Definitionen für seltene Themen, ein proaktives Sicherheitssystem für sensible Anfragen, animierte Ladezustände und kritische Fehlerbehebungen für die mathematische Darstellung und die Synonymgenerierung ein.",
+                details: [
+                    "**Verbesserte Genauigkeit:** Die KI-Argumentation für seltene Themen wurde durch die Zuweisung eines 'Denkbudgets' für die Erstsuche verbessert, was genauere Definitionen ohne 'Tiefere Suche' ermöglicht.",
+                    "**Proaktive Benutzersicherheit:** Ein neues Sicherheitssystem wurde implementiert, das sensible Themen erkennt, eine auffällige Warnung mit lokalisierten Support-Hotlines (basierend auf der Region des Benutzers) anzeigt und die KI anweist, hilfreiche Ressourcen in ihre Antworten aufzunehmen.",
+                    "**Verbesserte Ladeerfahrung:** Die statischen Ladebalken wurden durch eine subtile, pulsierende Animation ersetzt, die ein besseres visuelles Feedback während der Inhaltsgenerierung bietet.",
+                    "**Kritische Fehlerbehebung:** Ein Anwendungsabsturzfehler mit der `react-katex`-Bibliothek wurde behoben, wodurch sichergestellt wird, dass Inhalte mit mathematischen Formeln (LaTeX) jetzt korrekt geladen werden, ohne abzustürzen.",
+                    "**Kritische Fehlerbehebung:** Ein Anwendungsabsturz wurde behoben, der auftrat, wenn die Synonym-Generierungs-API eine leere oder blockierte Antwort zurückgab. Die App behandelt diese Fälle jetzt ordnungsgemäß und zeigt eine Meldung '(Keine Synonyme gefunden)' an, anstatt abzustürzen."
+                ],
+                technicalDetails: [
+                    "**Dynamisches Denkbudget:** Der `streamDefinition`-Dienst weist dem `gemini-2.5-flash`-Modell ein Denkbudget für Themen zu, die nicht in einer vordefinierten Liste enthalten sind, um die Qualität der Erstdefinition zu verbessern.",
+                    "**Sicherheitsvorprüfung:** Ein standortbezogener `checkTopicSafety`-Aufruf wurde in `App.tsx` vor dem Abrufen von Inhalten integriert, um sensible Anfragen zu erkennen und regionsspezifische Unterstützung bereitzustellen.",
+                    "**CSS-Animation:** Implementierung einer reinen CSS-`pulse`-Animation für die `LoadingSkeleton`-Komponente mit gestaffelten Verzögerungen für einen Welleneffekt.",
+                    "**Modul- & Prop-Korrekturen:** Der `react-katex`-Import in `ContentDisplay.tsx` wurde korrigiert, um einen CDN-Modul-Ladefehler zu beheben, und die fehlerhafte Übergabe von Props an die `InlineMath`-Komponente wurde behoben.",
+                    "**Robuste Fehlerbehandlung:** Im `getSynonyms`-Dienst wurde eine defensive Prüfung implementiert, um sicherzustellen, dass die API-Antwort Textinhalt enthält, bevor sie verarbeitet wird. Wenn `response.text` `undefined` ist, gibt die Funktion jetzt ein leeres Array zurück, wodurch verhindert wird, dass die `trim()`-Methode auf einem Nullwert aufgerufen wird."
+                ]
+            },
+            {
               id: '20251030', date: '30. Oktober 2025', version: 'Version 1.3.0',
               summary: "Version 1.3.0 ist ein großes Update, das sich auf Interaktivität und globalen Zugang konzentriert. Es verwandelt die gesamte Website in ein klickbares Wiki, fügt Unterstützung für Mandarin-Chinesisch und Arabisch hinzu, optimiert die Inhaltserkundung, fügt ein vollständiges Entdeckungstoolkit hinzu und enthält wichtige Leistungsoptimierungen.",
               details: [
@@ -941,6 +1013,24 @@ const translations = {
             },
         },
         updatesLog: [
+            {
+                id: '20251101', date: '2025年11月1日', version: 'バージョン 1.3.1',
+                summary: "このアップデートは、精度、安全性、ユーザーエクスペリエンス、安定性に焦点を当てています。珍しいトピックに対するより正確な定義、デリケートなクエリに対する積極的な安全システム、アニメーション化された読み込み状態、数式レンダリングと類義語生成の重要なバグ修正を導入します。",
+                details: [
+                    "**精度の向上：** 初回検索に「思考予算」を割り当てることで、珍しいトピックに対するAIの推論を強化し、「詳細検索」を必要とせずに、より正確な定義を提供します。",
+                    "**積極的なユーザーの安全性：** デリケートなトピックを検出し、地域のサポートホットライン（ユーザーの地域に基づく）を含む目立つ警告を表示し、AIに応答に役立つリソースを含めるよう指示する新しい安全システムを実装しました。",
+                    "**読み込みエクスペリエンスの強化：** 静的な読み込みバーを、コンテンツ生成中に視覚的なフィードバックを向上させる、繊細な脈動アニメーションに置き換えました。",
+                    "**クリティカルなバグ修正：** `react-katex`ライブラリに関するアプリケーションをクラッシュさせるエラーを解決し、数式（LaTeX）を含むコンテンツがクラッシュせずに正しく読み込まれるようになりました。",
+                    "**重大なバグ修正：** 類義語生成APIが空またはブロックされた応答を返したときに発生していたアプリケーションのクラッシュを解決しました。アプリはこれらのケースを適切に処理し、失敗する代わりに「(類義語が見つかりません)」というメッセージを表示するようになりました。"
+                ],
+                technicalDetails: [
+                    "**動的思考予算：** `streamDefinition`サービスは、事前定義されたリストにないトピックに対して`gemini-2.5-flash`モデルに思考予算を割り当て、初期定義の品質を向上させます。",
+                    "**安全性の事前チェック：** コンテンツを取得する前に、`App.tsx`に位置情報を認識する`checkTopicSafety`呼び出しを統合し、デリケートなクエリを検出して地域固有のサポートを提供します。",
+                    "**CSSアニメーション：** `LoadingSkeleton`コンポーネントに純粋なCSSの`pulse`アニメーションを実装しました。`nth-child`セレクターに段階的な`animation-delay`を設定することで、視覚的に美しい波の効果を生み出します。",
+                    "**モジュールとプロップの修正：** `ContentDisplay.tsx`の`react-katex`のインポートを修正し、CDNからのモジュール読み込み問題によって引き起こされる`SyntaxError`を解決し、`InlineMath`コンポーネントへの不正なプロップ渡しを修正しました。",
+                    "**堅牢なエラー処理：** `getSynonyms`サービスに、API応答が処理前にテキストコンテンツを含んでいることを確認するための防御的なチェックを実装しました。`response.text`が`undefined`の場合、関数は空の配列を返すようになり、null値に対して`trim()`メソッドが呼び出されるのを防ぎます。"
+                ]
+            },
             {
               id: '20251030', date: '2025年10月30日', version: 'バージョン1.3.0',
               summary: "バージョン1.3.0は、双方向性とグローバルアクセスに焦点を当てたメジャーアップデートです。サイト全体をクリック可能なウィキに変換し、中国語（北京語）とアラビア語のサポートを追加し、コンテンツの探索を合理化し、完全な発見ツールキットを追加し、主要なパフォーマンス最適化を含みます。",
@@ -1135,6 +1225,24 @@ const translations = {
         },
         updatesLog: [
             {
+                id: '20251101', date: '2025年11月1日', version: '版本 1.3.1',
+                summary: "本次更新侧重于准确性、安全性和用户体验和稳定性。它为不常见的主题引入了更准确的定义，为敏感查询引入了主动安全系统，增加了动画加载状态，并修复了数学渲染和同义词生成的关键错误。",
+                details: [
+                    "**提高准确性：** 通过为初始搜索分配“思考预算”，增强了AI对不常见主题的推理能力，无需“深度搜索”即可提供更准确的定义。",
+                    "**主动用户安全：** 实施了一个新的安全系统，可以检测敏感主题，显示带有本地化支持热线（基于用户所在地区）的醒目警告，并指示AI在其响应中包含有用的资源。",
+                    "**增强的加载体验：** 将静态加载条替换为微妙的脉冲动画，在内容生成时提供更好的视觉反馈。",
+                    "**关键错误修复：** 解决了`react-katex`库导致应用程序崩溃的错误，确保包含数学公式（LaTeX）的内容现在可以正确加载而不会崩溃。",
+                    "**关键错误修复：** 解决了当同义词生成API返回空响应或被阻止的响应时发生的应用程序崩溃问题。现在，应用程序可以优雅地处理这些情况，显示“（未找到同义词）”消息而不是失败。"
+                ],
+                technicalDetails: [
+                    "**动态思考预算：** `streamDefinition`服务为预定义列表中未找到的主题向`gemini-2.5-flash`模型分配思考预算，以提高初始定义的质量。",
+                    "**安全预检：** 在获取内容之前，在`App.tsx`中集成了位置感知的`checkTopicSafety`调用，以检测敏感查询并提供特定地区的支持。",
+                    "**CSS动画：** 为`LoadingSkeleton`组件实现了纯CSS的`pulse`动画，并使用交错延迟创造了波浪效果。",
+                    "**模块与道具修复：** 修正了`ContentDisplay.tsx`中`react-katex`的导入以解决CDN模块加载错误，并修复了向`InlineMath`组件传递不正确道具的问题。",
+                    "**稳健的错误处理：** 在`getSynonyms`服务中实施了防御性检查，以在处理API响应之前验证其是否包含文本内容。如果`response.text`为`undefined`，该函数现在会返回一个空数组，从而防止在空值上调用`trim()`方法。"
+                ]
+            },
+            {
               id: '20251030', date: '2025年10月30日', version: '版本 1.3.0',
               summary: "版本1.3.0是一次重大更新，专注于互动性和全球可访问性。它将整个网站转变为一个可点击的维基，增加了对中文普通话和阿拉伯语的支持，简化了内容探索，增加了一个完整的发现工具包，并包括了重大的性能优化。",
               details: [
@@ -1264,13 +1372,13 @@ const translations = {
         privacyUserFeedbackL3: 'تقييمك (إيجابي أو سلبي)',
         privacyUserFeedbackL4: 'ملاحظات نصية اختيارية تشرح تقييمك',
         privacyUserFeedbackL5: 'المحتوى الكامل الذي تم إنشاؤه بواسطة الذكاء الاصطناعي والذي قمت بتقييمه',
-        privacyUserFeedbackP2: 'تساعدنا الملاحظات على تحسين جودة المحتوى وفهم أي من التعريفات التي تم إنشاؤها بواسطة الذكاء الاصطناعي مفيدة.',
+        privacyUserFeedbackP2: 'تساعدنا המلاحظات على تحسين جودة المحتوى وفهم أي من التعريفات التي تم إنشاؤها بواسطة الذكاء الاصطناعي مفيدة.',
         privacyUserFeedbackP3: 'تقتصر عمليات إرسال الملاحظات على 5 في الساعة لكل مستخدم.',
         privacyThirdPartyTitle: 'خدمات الطرف الثالث',
         privacyThirdPartyP1: 'نحن نستخدم خدمات الطرف الثالث التالية:',
         privacyThirdPartyL1_1: 'واجهة برمجة تطبيقات Google Gemini:',
         privacyThirdPartyL1_2: 'تنشئ تعريفات مدعومة بالذكاء الاصطناعي. يتم إرسال عمليات البحث الخاصة بك إلى خوادم Google لإنشاء المحتوى.',
-        privacyThirdPartyL2: 'توفر بيانات تحديد الموقع الجغرافي بناءً على عنوان IP الخاص بك لأغراض التحليل.',
+        privacyThirdPartyL2: 'توفر بيانات تحديد الموقع الجغراfi بناءً على عنوان IP الخاص بك لأغراض التحليل.',
         privacyDataStorageTitle: 'تخزين البيانات',
         privacyDataStorageP1: 'يتم تخزين جميع البيانات التي تم جمعها بشكل آمن ولا يمكن الوصول إليها إلا من قبل مسؤول الموقع. نحن لا نبيع أو نشارك بياناتك مع أطراف ثالثة لأغراض التسويق.',
         privacyYourRightsTitle: 'حقوق الخصوصية الخاصة بك',
@@ -1326,6 +1434,24 @@ const translations = {
             },
         },
         updatesLog: [
+            {
+                id: '20251101', date: '1 نوفمبر 2025', version: 'الإصدار 1.3.1',
+                summary: "يركز هذا التحديث على الدقة والأمان وتجربة المستخدم والاستقرار. يقدم تعريفات أكثر دقة للمواضيع غير الشائعة، ونظام أمان استباقي للاستعلامات الحساسة، وحالات تحميل متحركة، وإصلاحات أخطاء حرجة لعرض الرياضيات وتوليد المرادفات.",
+                details: [
+                    "**دقة محسنة:** تم تحسين منطق الذكاء الاصطناعي للمواضيع غير الشائعة من خلال تخصيص 'ميزانية تفكير' للبحث الأولي، مما يوفر تعريفات أكثر دقة دون الحاجة إلى 'بحث أعمق'.",
+                    "**سلامة المستخدم الاستباقية:** تم تنفيذ نظام أمان جديد يكتشف المواضيع الحساسة، ويعرض تحذيرًا بارزًا مع خطوط مساعدة محلية (بناءً على منطقة المستخدم)، ويوجه الذكاء الاصطناعي لتضمين موارد مفيدة في ردوده.",
+                    "**تجربة تحميل محسنة:** تم استبدال أشرطة التحميل الثابتة برسوم متحركة نبضية دقيقة، مما يوفر تغذية بصرية أفضل أثناء إنشاء المحتوى.",
+                    "**إصلاح خطأ حرج:** تم حل خطأ كان يتسبب في تعطل التطبيق مع مكتبة `react-katex`، مما يضمن أن المحتوى الذي يحتوي على صيغ رياضية (LaTeX) يتم تحميله الآن بشكل صحيح دون تعطل.",
+                    "**إصلاح خطأ حرج:** تم حل مشكلة تعطل التطبيق التي كانت تحدث عندما تعيد واجهة برمجة تطبيقات توليد المرادفات استجابة فارغة أو محظورة. يتعامل التطبيق الآن مع هذه الحالات بأمان، حيث يعرض رسالة '(لم يتم العثور على مرادفات)' بدلاً من الفشل."
+                ],
+                technicalDetails: [
+                    "**ميزانية التفكير الديناميكية:** تخصص خدمة `streamDefinition` ميزانية تفكير لنموذج `gemini-2.5-flash` للمواضيع غير الموجودة في قائمة محددة مسبقًا لتحسين جودة التعريف الأولي.",
+                    "**فحص السلامة المسبق:** تم دمج استدعاء `checkTopicSafety` المدرك للموقع في `App.tsx` قبل جلب المحتوى لاكتشاف الاستعلامات الحساسة وتوفير دعم خاص بالمنطقة.",
+                    "**تحريك CSS:** تم تنفيذ تحريك `pulse` باستخدام CSS خالص لمكون `LoadingSkeleton` مع تأخيرات متدرجة لتأثير الموجة.",
+                    "**إصلاحات الوحدات والخصائص:** تم تصحيح استيراد `react-katex` في `ContentDisplay.tsx` لحل خطأ تحميل وحدة CDN وتم إصلاح تمرير الخصائص غير الصحيح إلى مكون `InlineMath`.",
+                    "**معالجة قوية للأخطاء:** تم تنفيذ فحص دفاعي في خدمة `getSynonyms` للتحقق من أن استجابة واجهة برمجة التطبيقات تحتوي على محتوى نصي قبل معالجتها. إذا كان `response.text` غير محدد (`undefined`)، فإن الدالة تعيد الآن مصفوفة فارغة، مما يمنع استدعاء دالة `trim()` على قيمة فارغة."
+                ]
+            },
             {
               id: '20251030', date: '30 أكتوبر 2025', version: 'الإصدار 1.3.0',
               summary: "الإصدار 1.3.0 هو تحديث رئيسي يركز على التفاعل والوصول العالمي. يحول الموقع بأكمله إلى ويكي قابل للنقر، ويضيف دعمًا للغة الصينية الماندرين والعربية، ويبسط استكشاف المحتوى، ويضيف مجموعة أدوات اكتشاف كاملة، ويتضمن تحسينات كبيرة في الأداء.",

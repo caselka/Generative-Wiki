@@ -4,8 +4,9 @@
 */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { streamDefinition, streamDeeperArticle, getSynonyms } from './services/geminiService';
+import { streamDefinition, streamDeeperArticle, getSynonyms, checkTopicSafety } from './services/geminiService';
 import { submitFeedback, logSearch, logDeepSearch } from './services/feedbackService';
+import { getGeolocationData } from './services/locationService';
 import ContentDisplay from './components/ContentDisplay';
 import SearchBar from './components/SearchBar';
 import LoadingSkeleton from './components/LoadingSkeleton';
@@ -64,8 +65,10 @@ const App: React.FC = () => {
   const [popupConfig, setPopupConfig] = useState<{ text: string; top: number; left: number } | null>(null);
   const [synonyms, setSynonyms] = useState<string[] | null>(null);
   const [isFetchingSynonyms, setIsFetchingSynonyms] = useState<boolean>(false);
-  const [isHistoryOpenMobile, setIsHistoryOpenMobile] = useState(true);
-  const [isSynonymsOpenMobile, setIsSynonymsOpenMobile] = useState(false);
+  const [safetyWarning, setSafetyWarning] = useState<string | null>(null);
+  const [isSensitiveTopic, setIsSensitiveTopic] = useState<boolean>(false);
+  const [isHistoryOpenMobile, setIsHistoryOpenMobile] = useState(false);
+  const [isSynonymsOpenMobile, setIsSynonymsOpenMobile] = useState(true);
   
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -190,10 +193,25 @@ const App: React.FC = () => {
       setIsSearchingDeeper(false);
       setGenerationTime(null);
       setCurrentRating(null);
+      setSafetyWarning(null);
+      setIsSensitiveTopic(false);
+      
+      const locationData = await getGeolocationData();
+      const countryCode = locationData?.countryCode || null;
+      
+      const safetyInfo = await checkTopicSafety(currentTopic, language, countryCode);
+      if (isCancelled) return;
+      
+      const isSensitive = safetyInfo?.isSensitive || false;
+      if (isSensitive) {
+          setSafetyWarning(safetyInfo!.warningMessage);
+          setIsSensitiveTopic(true);
+      }
+
       const startTime = performance.now();
       let accumulatedContent = '';
       try {
-        for await (const result of streamDefinition(currentTopic, language)) {
+        for await (const result of streamDefinition(currentTopic, language, isSensitive)) {
           if (isCancelled) break;
           if (result.error) throw new Error(result.error);
           
@@ -220,8 +238,12 @@ const App: React.FC = () => {
       } finally {
         if (!isCancelled) {
           const endTime = performance.now();
-          setGenerationTime(endTime - startTime);
+          const duration = endTime - startTime;
+          const durationMs = Math.max(0, Math.round(duration));
+          setGenerationTime(durationMs);
           setIsLoading(false);
+          // Log search event at completion with duration.
+          logSearch(currentTopic, durationMs);
         }
       }
     };
@@ -287,10 +309,19 @@ const App: React.FC = () => {
     
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
-    
-    // Defer logging to prioritize content loading and UI updates.
-    setTimeout(() => logSearch(trimmedTopic), 100);
   }, [history, historyIndex, currentTopic]);
+
+  // Effect to handle search from URL query parameter on initial load
+  useEffect(() => {
+    // Only run on initial page load when history is empty.
+    if (history.length === 0) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const query = urlParams.get('q');
+      if (query) {
+        navigateToTopic(query);
+      }
+    }
+  }, [navigateToTopic, history.length]);
 
   const handleWordClick = useCallback((word: string) => { navigateToTopic(word); }, [navigateToTopic]);
   const handleSearch = useCallback((topic: string) => { navigateToTopic(topic); }, [navigateToTopic]);
@@ -362,20 +393,18 @@ const App: React.FC = () => {
   const handleSearchDeeperClick = async () => {
     if (!currentTopic || isSearchingDeeper) return;
     
-    // Defer logging to prioritize content loading and UI updates.
-    setTimeout(() => logDeepSearch(currentTopic), 100);
-  
     let isCancelled = false;
-    // Set up the cancellation closure.
     deepSearchStreamCleaner.current = () => { isCancelled = true; };
 
     setIsSearchingDeeper(true);
     let accumulatedContent = '';
     setExpandedContent('');
     setIsExpanded(false);
+
+    const startTime = performance.now();
   
     try {
-      for await (const result of streamDeeperArticle(currentTopic, language)) {
+      for await (const result of streamDeeperArticle(currentTopic, language, isSensitiveTopic)) {
         if (isCancelled) break;
         if (result.error) throw new Error(result.error);
 
@@ -399,12 +428,14 @@ const App: React.FC = () => {
         console.error(e);
       }
     } finally {
-      // Only update state if the process was not cancelled.
       if (!isCancelled) {
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        const durationMs = Math.max(0, Math.round(duration));
+        logDeepSearch(currentTopic, durationMs);
         setIsSearchingDeeper(false);
         setIsExpanded(true);
       }
-      // Clean up the ref regardless.
       deepSearchStreamCleaner.current = null;
     }
   };
@@ -440,6 +471,11 @@ const App: React.FC = () => {
         <main>
           <div>
             <h1>{currentTopic}</h1>
+            {safetyWarning && (
+              <div className="safety-warning" role="alert">
+                <p>{safetyWarning}</p>
+              </div>
+            )}
             {error && (
               <div style={{ border: '1px solid #cc0000', padding: '1rem', color: '#cc0000' }}>
                 <p style={{ margin: 0 }}>{t.errorOccurred}</p>
@@ -570,7 +606,7 @@ const App: React.FC = () => {
       <footer className="sticky-footer">
         <p className="footer-text">
           {t.footerText} <a href="https://github.com/caselka" target="_blank" rel="noopener noreferrer">Caselka</a>
-          {page === 'wiki' && currentTopic && generationTime && ` · ${Math.round(generationTime)}ms`}
+          {page === 'wiki' && currentTopic && generationTime && ` · ${generationTime}ms`}
         </p>
          <nav className="footer-nav">
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('wiki'); }}>{t.navWiki}</a>

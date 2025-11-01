@@ -145,6 +145,40 @@ code {
   animation: blink 1s step-end infinite;
 }
 
+.safety-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 1rem;
+  border: 1px solid #ffeeba;
+  border-radius: 4px;
+  margin-bottom: 2rem;
+}
+.safety-warning p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .safety-warning {
+  background-color: #332701;
+  color: #ffeca7;
+  border-color: #4d3c02;
+}
+
+/* Animated Loading Skeleton */
+.skeleton-bar {
+  height: 1rem;
+  background-color: var(--skeleton-bg-color);
+  margin-bottom: 0.75rem;
+  border-radius: 4px;
+  animation: pulse 2s ease-in-out infinite;
+}
+.skeleton-bar:nth-child(1) { width: 100%; animation-delay: 0s; }
+.skeleton-bar:nth-child(2) { width: 83.33%; animation-delay: 0.1s; }
+.skeleton-bar:nth-child(3) { width: 100%; animation-delay: 0.2s; }
+.skeleton-bar:nth-child(4) { width: 75%; animation-delay: 0.3s; }
+.skeleton-bar:nth-child(5) { width: 66.66%; animation-delay: 0.4s; }
+
+
 .search-container {
   display: flex;
   align-items: baseline;
@@ -880,7 +914,7 @@ code {
   max-width: 1600px;
   margin: 0 auto;
 }
-main { grid-area: main-content; }
+.wiki-layout-grid > main { grid-area: main-content; }
 .left-sidebar { grid-area: sidebar-left; }
 .right-sidebar { grid-area: sidebar-right; }
 
@@ -983,7 +1017,10 @@ main { grid-area: main-content; }
     position: static;
     height: auto;
     overflow-y: visible;
-    margin-top: 3rem;
+    margin-top: 2rem;
+  }
+  .curation-container {
+    margin-top: 2rem;
   }
   .right-sidebar {
     max-width: 400px;
@@ -1060,6 +1097,9 @@ main { grid-area: main-content; }
     gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
+  }
+  .footer-nav a {
+    gap: 0.6em;
   }
   .settings-container {
     order: 3;

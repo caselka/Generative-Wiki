@@ -35,6 +35,38 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kosugi&family=Noto+Sans+Arabic&family=Noto+Sans+SC&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" integrity="sha384-sN/2sRqrjL3wouTqTdonTPSU0L30qKzRbTLMUzJ2sN2v5MftPE5Lg9FvRntmBmu3" crossorigin="anonymous">
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Generative Wiki",
+      "url": "https://generativewiki.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://generativewiki.com/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Generative Wiki",
+      "url": "https://generativewiki.com/",
+      "logo": "https://generativewiki.com/favicon.png",
+      "sameAs": [
+        "https://x.com/GenerativeWiki",
+        "https://github.com/caselka/Generative-Wiki"
+      ]
+    }
+    </script>
+
     <script type="importmap">
 {
   "imports": {

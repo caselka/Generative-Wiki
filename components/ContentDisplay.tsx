@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 import React from 'react';
-import Katex from 'react-katex';
+// FIX: Switched to a namespace import because the module loader was failing to resolve the
+// named export 'InlineMath' from the esm.sh CDN, causing a SyntaxError.
+import * as Katex from 'react-katex';
 
 interface ContentDisplayProps {
   content: string;
@@ -70,7 +72,9 @@ const InteractiveContent: React.FC<{
       {parts.map((part, index) => {
         if (index % 2 === 1) {
           // This part is LaTeX math, render it with KaTeX
-          return <Katex.InlineMath key={index} math={part} />;
+          // FIX: Using namespace import `Katex.InlineMath` to fix module resolution error.
+          // FIX: Pass `throwOnError` as a direct prop. The `settings` prop is not recognized by the current version of `react-katex`, causing a type error.
+          return <Katex.InlineMath key={index} math={part} throwOnError={false} />;
         } else {
           // This part is plain text, make each word clickable
           return <InteractiveText key={index} onWordClick={onWordClick}>{part}</InteractiveText>

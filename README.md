@@ -23,6 +23,26 @@ Generative Wiki is an experimental encyclopedia designed for fluid, associative,
 -   **Curation & Feedback**: Help improve the wiki by rating each generation with a thumbs-up or down. Optional text feedback is collected to enhance content quality.
 -   **Comprehensive Documentation**: A full **Docs** page explains all features, the technology behind the project, and includes a detailed changelog.
 
+## 📣 Latest Update: Version 1.3.1 (November 1, 2025)
+
+This release focuses on enhancing the core user experience by improving the quality and reliability of generated content, strengthening user safety protocols, and fixing critical bugs.
+
+### Key Features & Enhancements
+
+*   **Improved Accuracy:** Enhanced the AI's reasoning for uncommon topics by allocating a 'thinking budget' for the initial search, providing more accurate definitions without requiring a 'Search Deeper' action.
+*   **Proactive User Safety:** Implemented a new safety system that detects sensitive topics, displays a prominent warning with localized support hotlines (based on user's region), and instructs the AI to include helpful resources in its responses.
+*   **Enhanced Loading Experience:** Replaced static loading bars with a subtle, pulsing animation for better visual feedback during content generation.
+
+### Bug Fixes & Stability
+
+*   **Robust Logging:** Fixed a critical bug where content generation time was not being logged correctly. Implemented a robust, multi-layered fix:
+    *   **Client-Side Timer:** Generation time is now accurately measured using `performance.now()`.
+    *   **Client-Side Hardening:** The logging service now validates `generationTime` to ensure it's a non-negative integer, sending `null` for invalid values to prevent server errors.
+    *   **Server-Side Guard:** The Google Apps Script now defensively handles `generationTime`, ensuring it can process numbers, number-like strings, or `null` without failing.
+    *   **CORS Fix:** Resolved a network issue by reverting the `Content-Type` header on logging requests to `text/plain`, preventing CORS preflight failures with the Apps Script backend.
+*   **Math Rendering Fix:** Resolved an application-breaking error with the `react-katex` library, ensuring content with mathematical formulas (LaTeX) loads correctly.
+*   **Synonym Generation Fix:** Resolved an application crash that occurred when the synonym generation API returned an empty or blocked response. The app now gracefully handles these cases.
+
 ## 🛠️ Tech Stack
 
 -   **Frontend**: React, TypeScript

@@ -2,13 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
+import { getGeolocationData } from './locationService';
 
 // README: How to Set Up Your Feedback & Logging Database
 //
 // This Google Apps Script creates and manages TWO separate sheets in your Google Sheet document:
 // 1. 'Feedback': Captures all user-submitted ratings (👍/👎), optional text feedback,
 //    the generated content that was rated, whether "Deep Search" was used, and the user's location data.
-// 2. 'Search Logs': Captures every search query and "Deep Search" action, along with a timestamp and approximate location.
+// 2. 'Search Logs': Captures every search query and "Deep Search" action, along with a timestamp, approximate location, and content generation time.
 //
 // STEPS:
 // 1. Create a new Google Sheet.
@@ -37,7 +38,7 @@ function doPost(e) {
     if (data.type === 'search' || data.type === 'deep_search') {
       var searchSheetName = 'Search Logs';
       var sheet = ss.getSheetByName(searchSheetName);
-      var expectedHeaders = ["Timestamp", "Topic", "Deep Search Used", "IP Address", "Country", "Region", "City", "Latitude", "Longitude", "ISP", "Organization"];
+      var expectedHeaders = ["Timestamp", "Topic", "Deep Search Used", "IP Address", "Country", "Region", "City", "Latitude", "Longitude", "ISP", "Organization", "Generation Time (ms)"];
       var needsMigration = false;
       
       if (!sheet) {
@@ -45,7 +46,8 @@ function doPost(e) {
         sheet.appendRow(expectedHeaders);
       } else if (sheet.getLastRow() > 0) {
         var currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-        if (currentHeaders.length < 3 || currentHeaders[2] !== 'Deep Search Used') {
+        // Check if the "Generation Time (ms)" column is missing
+        if (currentHeaders.length < 12 || currentHeaders[11] !== 'Generation Time (ms)') {
           needsMigration = true;
         }
       } else { // Sheet is empty
@@ -67,6 +69,13 @@ function doPost(e) {
       }
 
       var deepSearchUsed = data.type === 'deep_search' ? 'Yes' : 'No';
+      
+      var raw = data.generationTime;
+      var genTimeValue = 'N/A';
+      if (raw !== null && raw !== undefined) {
+        var n = Number(raw);
+        if (Number.isFinite(n) && n >= 0) genTimeValue = Math.round(n);
+      }
 
       sheet.appendRow([
         timestamp,
@@ -79,7 +88,8 @@ function doPost(e) {
         loc.lat || 'N/A',
         loc.lon || 'N/A',
         loc.isp || 'N/A',
-        loc.org || 'N/A'
+        loc.org || 'N/A',
+        genTimeValue
       ]);
 
     } else { // Handle feedback (default)
@@ -170,8 +180,6 @@ const FEEDBACK_STORAGE_KEY = 'feedbackSubmissions';
 const MAX_SEARCH_LOGS_PER_HOUR = 100;
 const SEARCH_LOG_STORAGE_KEY = 'searchLogSubmissions';
 
-const GEOLOCATION_CACHE_KEY = 'geolocationData';
-
 interface FeedbackData {
     topic: string;
     rating: 'up' | 'down';
@@ -242,64 +250,12 @@ export async function submitFeedback(data: FeedbackData): Promise<void> {
 }
 
 /**
- * Fetches geolocation data, caching the result in sessionStorage to minimize API calls.
- * @returns A promise that resolves to the location data object or an empty object on failure.
- */
-async function getGeolocationData(): Promise<Record<string, any>> {
-    try {
-        const cachedData = sessionStorage.getItem(GEOLOCATION_CACHE_KEY);
-        if (cachedData) {
-            return JSON.parse(cachedData);
-        }
-    } catch (error) {
-        console.warn("Could not read from sessionStorage:", error);
-    }
-
-    try {
-        const response = await fetch('https://ipapi.co/json/?key=EOh0COlyp0yo5giaRQ1dX9lJRWC6ZdV4DfV2a55DiH539UVNDe');
-        if (!response.ok) {
-            console.warn(`Geolocation API responded with status: ${response.status}`);
-            return {};
-        }
-
-        const data = await response.json();
-        if (data.error) {
-            console.warn(`Geolocation API returned an error: ${data.reason}`);
-            // Don't cache error responses as they may be temporary (e.g. rate limit)
-            return {};
-        }
-
-        const locationData = {
-            ip: data.ip || 'N/A',
-            country: data.country_name || 'N/A',
-            regionName: data.region || 'N/A',
-            city: data.city || 'N/A',
-            lat: data.latitude || 'N/A',
-            lon: data.longitude || 'N/A',
-            isp: data.org || 'N/A',
-            org: data.org || 'N/A',
-        };
-
-        try {
-            sessionStorage.setItem(GEOLOCATION_CACHE_KEY, JSON.stringify(locationData));
-        } catch (error) {
-            console.warn("Could not write to sessionStorage:", error);
-        }
-        
-        return locationData;
-
-    } catch (error) {
-        console.warn("Could not fetch geolocation data:", error);
-        return {};
-    }
-}
-
-/**
  * Logs a generic search-related event. This is a fire-and-forget function.
  * @param type The type of event ('search' or 'deep_search').
  * @param topic The search term associated with the event.
+ * @param generationTime The time in milliseconds for the content generation.
  */
-async function logGenericSearchEvent(type: 'search' | 'deep_search', topic: string): Promise<void> {
+async function logGenericSearchEvent(type: 'search' | 'deep_search', topic: string, generationTime: number): Promise<void> {
     try {
         checkAndRecord(SEARCH_LOG_STORAGE_KEY, MAX_SEARCH_LOGS_PER_HOUR, 'search logs');
     } catch (e) {
@@ -307,12 +263,18 @@ async function logGenericSearchEvent(type: 'search' | 'deep_search', topic: stri
         return; // Silently exit if rate limited
     }
 
+    const safeGenMs =
+        Number.isFinite(generationTime) && generationTime >= 0
+            ? Math.round(generationTime)
+            : null;
+
     const locationData = await getGeolocationData();
     
     const payload = {
         type: type,
         topic: topic,
         location: locationData,
+        generationTime: safeGenMs,
     };
 
     if (!SCRIPT_URL) {
@@ -337,15 +299,17 @@ async function logGenericSearchEvent(type: 'search' | 'deep_search', topic: stri
 /**
  * Logs a standard search query.
  * @param topic The search term that was used.
+ * @param generationTime The time in milliseconds for the content generation.
  */
-export async function logSearch(topic: string): Promise<void> {
-    await logGenericSearchEvent('search', topic);
+export async function logSearch(topic: string, generationTime: number): Promise<void> {
+    await logGenericSearchEvent('search', topic, generationTime);
 }
 
 /**
  * Logs when a "Deep Search" action is performed on a topic.
  * @param topic The topic that was searched deeper.
+ * @param generationTime The time in milliseconds for the content generation.
  */
-export async function logDeepSearch(topic: string): Promise<void> {
-    await logGenericSearchEvent('deep_search', topic);
+export async function logDeepSearch(topic: string, generationTime: number): Promise<void> {
+    await logGenericSearchEvent('deep_search', topic, generationTime);
 }
